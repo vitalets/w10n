@@ -15,6 +15,19 @@
           "target": "~/src/w10n/storage/index.ts"
         }
       ]
+    },
+    {
+      "name": "logger",
+      "type": "registry:item",
+      "title": "Logger",
+      "description": "A console-compatible logger with build-time forcing and synchronized local-storage controls.",
+      "files": [
+        {
+          "path": "src/logger/index.ts",
+          "type": "registry:file",
+          "target": "~/src/w10n/logger/index.ts"
+        }
+      ]
     }
   ]
 }

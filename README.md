@@ -18,6 +18,59 @@ modified, and maintained locally, including by coding agents.
 
 ## Modules
 
+### Logger
+
+`logger` provides console-compatible `log`, `info`, `warn`, and `error`
+methods controlled by a setting in `chrome.storage.local`. It automatically
+loads the setting when imported and synchronizes changes between extension
+contexts.
+
+Install it with:
+
+```sh
+npx shadcn@latest add vitalets/w10n/logger
+```
+
+Add the `storage` permission to the extension manifest:
+
+```json
+{
+  "permissions": ["storage"]
+}
+```
+
+Then use the logger and its runtime controls:
+
+```ts
+import {
+  forceEnabled,
+  loadLoggingEnabled,
+  logger,
+  setLoggingEnabled,
+} from "~/src/w10n/logger";
+
+logger.info("Extension started");
+await setLoggingEnabled(true);
+
+const runtimeEnabled = await loadLoggingEnabled();
+console.log({ forceEnabled, runtimeEnabled });
+```
+
+Before the initial storage read finishes, writes are buffered and later flushed
+in order when logging is enabled. The runtime setting is stored under
+`logging-enabled`. Storage read failures discard buffered writes and are thrown
+asynchronously so they do not block module import. Storage write failures reject
+the promise returned by `setLoggingEnabled()` without rolling back the in-memory
+setting.
+
+`forceEnabled` is derived from `import.meta.env.LOGGING_ENABLED`; only `true`,
+`"true"`, and `"1"` enable it. Forced logging takes effect immediately and
+cannot be disabled by the runtime setting. Because the module is distributed as
+source, consumers can edit the environment expression and storage key at the
+top of `src/logger/index.ts` when their build or naming conventions differ.
+
+### Storage
+
 `storage` is currently a scaffold containing an empty public entrypoint. It does
 not expose an API yet.
 
