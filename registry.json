@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "w10n",
+  "homepage": "https://github.com/vitalets/w10n",
+  "items": [
+    {
+      "name": "storage",
+      "type": "registry:item",
+      "title": "Storage",
+      "description": "A scaffold for WebExtension storage source.",
+      "files": [
+        {
+          "path": "src/storage/index.ts",
+          "type": "registry:file",
+          "target": "~/src/w10n/storage/index.ts"
+        }
+      ]
+    }
+  ]
+}

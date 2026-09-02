@@ -1,0 +1,16 @@
+{
+  "name": "w10n",
+  "description": "Source-first TypeScript modules for WebExtension development.",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "tsc": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "registry:validate": "npx --yes shadcn@latest registry validate"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.2.8",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  }
+}
