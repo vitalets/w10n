@@ -86,13 +86,13 @@ describe("logger", () => {
       const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
       const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
-      const { forceEnabled, logger } = await import("./index");
+      const { enabledByEnv, logger } = await import("./index");
       logger.log("log");
       logger.info("info", 1);
       logger.warn("warn", { id: 2 });
       logger.error("error", new Error("failure"));
 
-      expect(forceEnabled).toBe(true);
+      expect(enabledByEnv).toBe(true);
       expect(log).toHaveBeenCalledWith("log");
       expect(info).toHaveBeenCalledWith("info", 1);
       expect(warn).toHaveBeenCalledWith("warn", { id: 2 });
@@ -105,10 +105,10 @@ describe("logger", () => {
     installChromeStorage(new Promise(() => undefined));
     const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
 
-    const { forceEnabled, logger } = await import("./index");
+    const { enabledByEnv, logger } = await import("./index");
     logger.log("forced");
 
-    expect(forceEnabled).toBe(true);
+    expect(enabledByEnv).toBe(true);
     expect(log).toHaveBeenCalledWith("forced");
   });
 
@@ -119,10 +119,10 @@ describe("logger", () => {
       installChromeStorage(new Promise(() => undefined));
       const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
 
-      const { forceEnabled, logger } = await import("./index");
+      const { enabledByEnv, logger } = await import("./index");
       logger.log("buffered");
 
-      expect(forceEnabled).toBe(false);
+      expect(enabledByEnv).toBe(false);
       expect(log).not.toHaveBeenCalled();
     },
   );

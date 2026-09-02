@@ -1,6 +1,6 @@
 const storageKey = "logging-enabled";
 
-export const forceEnabled = booleanEnv(import.meta.env?.LOGGING_ENABLED);
+export const enabledByEnv = booleanEnv(import.meta.env?.LOGGING_ENABLED);
 
 declare global {
   interface ImportMetaEnv {
@@ -23,14 +23,31 @@ let stateRevision = 0;
 initLogging();
 
 export const logger = {
+  /**
+   * Writes a standard log message when logging is enabled.
+   */
   log: (...args: unknown[]) => write("log", args),
+
+  /**
+   * Writes an informational message when logging is enabled.
+   */
   info: (...args: unknown[]) => write("info", args),
+
+  /**
+   * Writes a warning message when logging is enabled.
+   */
   warn: (...args: unknown[]) => write("warn", args),
+
+  /**
+   * Writes an error message when logging is enabled.
+   */
   error: (...args: unknown[]) => write("error", args),
 };
 
-/** Changes logging immediately and persists the setting for all extension contexts. */
-export function setLoggingEnabled(enabled: boolean): Promise<void> {
+/**
+ * Changes logging immediately and persists the setting for all extension contexts.
+ */
+export function setLoggingEnabled(enabled: boolean) {
   stateRevision += 1;
   applyLoggingEnabled(enabled);
   try {
@@ -40,7 +57,10 @@ export function setLoggingEnabled(enabled: boolean): Promise<void> {
   }
 }
 
-export function loadLoggingEnabled(): Promise<boolean> {
+/**
+ * Loads and applies the persisted logging setting while sharing active reads.
+ */
+export function loadLoggingEnabled() {
   if (loadPromise) return loadPromise;
 
   const revisionAtStart = stateRevision;
@@ -64,11 +84,17 @@ export function loadLoggingEnabled(): Promise<boolean> {
   return promise;
 }
 
-function booleanEnv(value: unknown): boolean {
+/**
+ * Converts supported environment values into a logging-enabled boolean.
+ */
+function booleanEnv(value: unknown) {
   return value === true || value === "true" || value === "1";
 }
 
-function initLogging(): void {
+/**
+ * Starts storage synchronization and the initial logging-setting load.
+ */
+function initLogging() {
   try {
     getStorage().onChanged.addListener(handleStorageChanged);
     void loadLoggingEnabled().catch(() => undefined);
@@ -78,23 +104,32 @@ function initLogging(): void {
   }
 }
 
-function getStorage(): typeof chrome.storage {
+/**
+ * Provides the Chrome storage API or reports that it is unavailable.
+ */
+function getStorage() {
   if (typeof chrome === "undefined" || !chrome.storage) {
     throw new Error("chrome.storage is unavailable");
   }
   return chrome.storage;
 }
 
+/**
+ * Applies relevant logging-setting changes received from extension storage.
+ */
 function handleStorageChanged(
   changes: Record<string, chrome.storage.StorageChange>,
   areaName: chrome.storage.AreaName,
-): void {
+) {
   if (areaName !== "local" || !(storageKey in changes)) return;
   stateRevision += 1;
   applyLoggingEnabled(Boolean(changes[storageKey]?.newValue));
 }
 
-function reportAsyncError(error: unknown): void {
+/**
+ * Surfaces a storage failure asynchronously without blocking the current flow.
+ */
+function reportAsyncError(error: unknown) {
   const reportedError =
     error instanceof Error ? error : new Error(String(error));
   queueMicrotask(() => {
@@ -102,7 +137,10 @@ function reportAsyncError(error: unknown): void {
   });
 }
 
-function applyLoggingEnabled(enabled: boolean): void {
+/**
+ * Updates runtime logging and resolves any writes buffered during startup.
+ */
+function applyLoggingEnabled(enabled: boolean) {
   runtimeEnabled = enabled;
   if (enabled) {
     for (const [method, args] of bufferedWrites) {
@@ -112,8 +150,11 @@ function applyLoggingEnabled(enabled: boolean): void {
   bufferedWrites.length = 0;
 }
 
-function write(method: LogMethod, args: readonly unknown[]): void {
-  if (forceEnabled || runtimeEnabled) {
+/**
+ * Sends a message to the requested console method or buffers it during startup.
+ */
+function write(method: LogMethod, args: readonly unknown[]) {
+  if (enabledByEnv || runtimeEnabled) {
     globalThis.console[method](...args);
   } else if (runtimeEnabled === undefined) {
     bufferedWrites.push([method, args]);

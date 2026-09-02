@@ -37,6 +37,15 @@ step and no configured lint or format command.
   consumers receiving copied source.
 - Do not add abstractions, configuration, or tooling without a concrete need.
 - Preserve strict TypeScript compatibility and the existing ESM setup.
+- Begin every source file with a multiline JSDoc block that states the file's
+  purpose, and update it whenever that purpose changes.
+- Give every function a multiline JSDoc block that states its purpose. Keep
+  these comments purpose-only, without `@param` or `@returns` tags.
+- Let TypeScript infer function return types. Add an explicit return type only
+  when TypeScript requires one.
+- Place exported function declarations before private function declarations.
+  Keep imports, types, constants, and module-level variables above the exported
+  functions.
 - Use WebExtension APIs through the configured `chrome` types. If behavior
   differs between browsers, document and test the intended compatibility.
 - Treat each module's `index.ts` as its public API; keep implementation details
