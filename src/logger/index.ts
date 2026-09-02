@@ -1,3 +1,6 @@
+/**
+ * Provides console-compatible logging controlled by environment and extension storage settings.
+ */
 const storageKey = "logging-enabled";
 
 export const enabledByEnv = booleanEnv(import.meta.env?.LOGGING_ENABLED);
@@ -85,13 +88,6 @@ export function loadLoggingEnabled() {
 }
 
 /**
- * Converts supported environment values into a logging-enabled boolean.
- */
-function booleanEnv(value: unknown) {
-  return value === true || value === "true" || value === "1";
-}
-
-/**
  * Starts storage synchronization and the initial logging-setting load.
  */
 function initLogging() {
@@ -105,16 +101,6 @@ function initLogging() {
 }
 
 /**
- * Provides the Chrome storage API or reports that it is unavailable.
- */
-function getStorage() {
-  if (typeof chrome === "undefined" || !chrome.storage) {
-    throw new Error("chrome.storage is unavailable");
-  }
-  return chrome.storage;
-}
-
-/**
  * Applies relevant logging-setting changes received from extension storage.
  */
 function handleStorageChanged(
@@ -124,17 +110,6 @@ function handleStorageChanged(
   if (areaName !== "local" || !(storageKey in changes)) return;
   stateRevision += 1;
   applyLoggingEnabled(Boolean(changes[storageKey]?.newValue));
-}
-
-/**
- * Surfaces a storage failure asynchronously without blocking the current flow.
- */
-function reportAsyncError(error: unknown) {
-  const reportedError =
-    error instanceof Error ? error : new Error(String(error));
-  queueMicrotask(() => {
-    throw reportedError;
-  });
 }
 
 /**
@@ -159,4 +134,32 @@ function write(method: LogMethod, args: readonly unknown[]) {
   } else if (runtimeEnabled === undefined) {
     bufferedWrites.push([method, args]);
   }
+}
+
+/**
+ * Provides the Chrome storage API or reports that it is unavailable.
+ */
+function getStorage() {
+  if (typeof chrome === "undefined" || !chrome.storage) {
+    throw new Error("chrome.storage is unavailable");
+  }
+  return chrome.storage;
+}
+
+/**
+ * Surfaces a storage failure asynchronously without blocking the current flow.
+ */
+function reportAsyncError(error: unknown) {
+  const reportedError =
+    error instanceof Error ? error : new Error(String(error));
+  queueMicrotask(() => {
+    throw reportedError;
+  });
+}
+
+/**
+ * Converts supported environment values into a logging-enabled boolean.
+ */
+function booleanEnv(value: unknown) {
+  return value === true || value === "true" || value === "1";
 }

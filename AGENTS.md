@@ -45,7 +45,8 @@ step and no configured lint or format command.
   when TypeScript requires one.
 - Place exported function declarations before private function declarations.
   Keep imports, types, constants, and module-level variables above the exported
-  functions.
+  functions. Within each group, order functions from higher-level operations to
+  lower-level details, ending the file with the simplest one-line helpers.
 - Use WebExtension APIs through the configured `chrome` types. If behavior
   differs between browsers, document and test the intended compatibility.
 - Treat each module's `index.ts` as its public API; keep implementation details
