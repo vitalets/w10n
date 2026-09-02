@@ -52,6 +52,7 @@ export function loadLoggingEnabled(): Promise<boolean> {
       return enabled;
     })
     .catch((error: unknown) => {
+      if (stateRevision === revisionAtStart) applyLoggingEnabled(false);
       reportAsyncError(error);
       throw error;
     })
@@ -70,10 +71,7 @@ function booleanEnv(value: unknown): boolean {
 function initLogging(): void {
   try {
     getStorage().onChanged.addListener(handleStorageChanged);
-    const revisionAtStart = stateRevision;
-    void loadLoggingEnabled().catch(() => {
-      if (stateRevision === revisionAtStart) applyLoggingEnabled(false);
-    });
+    void loadLoggingEnabled().catch(() => undefined);
   } catch (error) {
     applyLoggingEnabled(false);
     reportAsyncError(error);

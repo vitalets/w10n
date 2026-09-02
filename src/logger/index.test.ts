@@ -49,16 +49,31 @@ describe("logger", () => {
   test("buffers writes until stored logging is enabled", async () => {
     const pendingLoad = deferred<Record<string, unknown>>();
     installChromeStorage(pendingLoad.promise);
-    const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    const writes: Array<[string, ...unknown[]]> = [];
+    vi.spyOn(console, "log").mockImplementation((...args) =>
+      writes.push(["log", ...args]),
+    );
+    vi.spyOn(console, "warn").mockImplementation((...args) =>
+      writes.push(["warn", ...args]),
+    );
+    vi.spyOn(console, "error").mockImplementation((...args) =>
+      writes.push(["error", ...args]),
+    );
     const { loadLoggingEnabled, logger } = await import("./index");
 
     logger.log("started", 1);
-    expect(log).not.toHaveBeenCalled();
+    logger.warn("warming up");
+    logger.error("not ready");
+    expect(writes).toEqual([]);
 
     pendingLoad.resolve({ "logging-enabled": true });
     await loadLoggingEnabled();
 
-    expect(log).toHaveBeenCalledWith("started", 1);
+    expect(writes).toEqual([
+      ["log", "started", 1],
+      ["warn", "warming up"],
+      ["error", "not ready"],
+    ]);
   });
 
   test.each(["true", "1"])(
@@ -82,6 +97,33 @@ describe("logger", () => {
       expect(info).toHaveBeenCalledWith("info", 1);
       expect(warn).toHaveBeenCalledWith("warn", { id: 2 });
       expect(error).toHaveBeenCalledWith("error", expect.any(Error));
+    },
+  );
+
+  test("accepts a boolean force flag injected by a bundler", async () => {
+    (import.meta.env as Record<string, unknown>).LOGGING_ENABLED = true;
+    installChromeStorage(new Promise(() => undefined));
+    const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+    const { forceEnabled, logger } = await import("./index");
+    logger.log("forced");
+
+    expect(forceEnabled).toBe(true);
+    expect(log).toHaveBeenCalledWith("forced");
+  });
+
+  test.each(["false", "0", "", undefined])(
+    "does not force logging with %s",
+    async (envValue) => {
+      vi.stubEnv("LOGGING_ENABLED", envValue);
+      installChromeStorage(new Promise(() => undefined));
+      const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
+
+      const { forceEnabled, logger } = await import("./index");
+      logger.log("buffered");
+
+      expect(forceEnabled).toBe(false);
+      expect(log).not.toHaveBeenCalled();
     },
   );
 
@@ -262,5 +304,26 @@ describe("logger", () => {
     expect(log).not.toHaveBeenCalled();
     expect(queuedErrors).toHaveLength(1);
     expect(() => queuedErrors[0]!()).toThrow("read failed");
+  });
+
+  test("disables logging when a fresh storage read fails", async () => {
+    const initialLoad = deferred<Record<string, unknown>>();
+    let readCount = 0;
+    installChromeStorage(() =>
+      readCount++ === 0
+        ? initialLoad.promise
+        : Promise.reject(new Error("fresh read failed")),
+    );
+    vi.stubGlobal("queueMicrotask", vi.fn());
+    const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    const { loadLoggingEnabled, logger } = await import("./index");
+    const activeLoad = loadLoggingEnabled();
+    initialLoad.resolve({ "logging-enabled": true });
+    await activeLoad;
+
+    await expect(loadLoggingEnabled()).rejects.toThrow("fresh read failed");
+    logger.log("disabled after failure");
+
+    expect(log).not.toHaveBeenCalled();
   });
 });
