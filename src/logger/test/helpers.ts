@@ -1,53 +1,30 @@
 /**
- * Provides logger test helpers for controllable storage, console, and errors.
+ * Provides logger test helpers for controllable storage, console, and environment values.
  */
 import { vi } from "vitest";
-import {
-  installChromeStorage,
-} from "../../../test-utils/chrome-storage";
+import { installChromeStorage } from "../../../test-utils/chrome-storage";
 import { captureConsole } from "../../../test-utils/console";
 
-type StorageHarness = ReturnType<typeof installChromeStorage>;
-type StorageValues = Record<string, unknown>;
-
 interface LoggerSetupOptions {
-  captureErrors?: boolean;
-  env?: string | boolean;
-  initialLoad?: Promise<StorageValues> | StorageValues;
-  storage?: StorageHarness | false;
-  stored?: unknown;
+  env?: {
+    LOGGING?: string | boolean;
+  };
+  storage?: Record<string, unknown>;
 }
-
-const storageKey = "logging-enabled";
 
 /**
  * Imports a fresh logger module configured for one observable test scenario.
  */
 export async function setupLogger(options: LoggerSetupOptions = {}) {
   vi.resetModules();
-  const env = Object.hasOwn(options, "env") ? options.env : "false";
-  vi.stubEnv("LOGGING", env as string | undefined);
+  vi.stubEnv("LOGGING", options.env?.LOGGING as string | undefined);
 
-  const storage =
-    options.storage ||
-    installChromeStorage(
-      Object.hasOwn(options, "stored")
-        ? { [storageKey]: options.stored }
-        : {},
-    );
-  if (options.initialLoad) storage.queueGet(options.initialLoad);
-  if (options.storage === false) vi.stubGlobal("chrome", undefined);
+  const storage = installChromeStorage(options.storage);
 
-  const writes = captureConsole();
-  const reportedErrors: Array<() => void> = [];
-  if (options.captureErrors) {
-    vi.stubGlobal("queueMicrotask", (callback: () => void) => {
-      reportedErrors.push(callback);
-    });
-  }
+  const stdout = captureConsole();
 
   const loggerModule = await import("../index");
-  return { ...loggerModule, reportedErrors, storage, writes };
+  return { ...loggerModule, stdout, storage };
 }
 
 /**

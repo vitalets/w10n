@@ -21,9 +21,8 @@ modified, and maintained locally, including by coding agents.
 ### Logger
 
 `logger` provides console-compatible `log`, `info`, `warn`, and `error`
-methods controlled by a setting in `chrome.storage.local`. It automatically
-loads the setting when imported and synchronizes changes between extension
-contexts.
+methods. It uses `LOGGING` as its build-time default and can load an overriding
+setting from `chrome.storage.local` or update it with `setLoggingEnabled()`.
 
 Install it with:
 

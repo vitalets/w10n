@@ -1,9 +1,8 @@
 /**
- * Provides console-compatible logging controlled by environment and extension storage settings.
+ * Provides console-compatible logging with an environment default that can be replaced from extension storage.
  */
 const storageKey = "logging-enabled";
-
-export const enabledByEnv = booleanEnv(import.meta.env?.LOGGING);
+const defaultLoggingEnabled = booleanEnv(import.meta.env?.LOGGING);
 
 declare global {
   interface ImportMetaEnv {
@@ -18,12 +17,9 @@ declare global {
 type LogMethod = "log" | "info" | "warn" | "error";
 type BufferedWrite = readonly [method: LogMethod, args: readonly unknown[]];
 
-const bufferedWrites: BufferedWrite[] = [];
-let runtimeEnabled: boolean | undefined;
-let loadPromise: Promise<boolean> | undefined;
+const buffer: BufferedWrite[] = [];
+let loggingEnabled: boolean | undefined;
 let stateRevision = 0;
-
-initLogging();
 
 export const logger = {
   /**
@@ -48,113 +44,56 @@ export const logger = {
 };
 
 /**
- * Changes logging immediately and persists the setting for all extension contexts.
+ * Applies the logging setting immediately and persists it for future loads.
  */
 export function setLoggingEnabled(enabled: boolean) {
   stateRevision += 1;
   applyLoggingEnabled(enabled);
-  try {
-    return getStorage().local.set({ [storageKey]: enabled });
-  } catch (error) {
-    return Promise.reject(error);
-  }
+  return chrome.storage.local.set({ [storageKey]: enabled });
 }
 
 /**
- * Loads and applies the persisted logging setting while sharing active reads.
+ * Loads and applies the logging setting, falling back to the environment default.
  */
-export function loadLoggingEnabled() {
-  if (loadPromise) return loadPromise;
-
+export async function loadLoggingEnabled() {
   const revisionAtStart = stateRevision;
-  const promise = Promise.resolve()
-    .then(() => getStorage().local.get({ [storageKey]: false }))
-    .then((data) => {
-      const enabled = Boolean(data[storageKey]);
-      if (stateRevision === revisionAtStart) applyLoggingEnabled(enabled);
-      return enabled;
-    })
-    .catch((error: unknown) => {
-      if (stateRevision === revisionAtStart) applyLoggingEnabled(false);
-      reportAsyncError(error);
-      throw error;
-    })
-    .finally(() => {
-      if (loadPromise === promise) loadPromise = undefined;
-    });
-
-  loadPromise = promise;
-  return promise;
-}
-
-/**
- * Starts storage synchronization and the initial logging-setting load.
- */
-function initLogging() {
   try {
-    getStorage().onChanged.addListener(handleStorageChanged);
-    void loadLoggingEnabled().catch(() => undefined);
+    const data = await chrome.storage.local.get({
+      [storageKey]: defaultLoggingEnabled,
+    });
+    const enabled = Boolean(data[storageKey]);
+    if (stateRevision === revisionAtStart) applyLoggingEnabled(enabled);
+    return enabled;
   } catch (error) {
-    applyLoggingEnabled(false);
-    reportAsyncError(error);
+    if (stateRevision === revisionAtStart && loggingEnabled === undefined) {
+      applyLoggingEnabled(defaultLoggingEnabled);
+    }
+    globalThis.console.error(error);
   }
 }
 
 /**
- * Applies relevant logging-setting changes received from extension storage.
- */
-function handleStorageChanged(
-  changes: Record<string, chrome.storage.StorageChange>,
-  areaName: chrome.storage.AreaName,
-) {
-  if (areaName !== "local" || !(storageKey in changes)) return;
-  stateRevision += 1;
-  applyLoggingEnabled(Boolean(changes[storageKey]?.newValue));
-}
-
-/**
- * Updates runtime logging and resolves any writes buffered during startup.
+ * Applies the loaded setting and resolves any writes buffered during startup.
  */
 function applyLoggingEnabled(enabled: boolean) {
-  runtimeEnabled = enabled;
+  loggingEnabled = enabled;
   if (enabled) {
-    for (const [method, args] of bufferedWrites) {
+    for (const [method, args] of buffer) {
       globalThis.console[method](...args);
     }
   }
-  bufferedWrites.length = 0;
+  buffer.length = 0;
 }
 
 /**
- * Sends a message to the requested console method or buffers it during startup.
+ * Sends a message when logging is enabled or buffers it before the first load.
  */
 function write(method: LogMethod, args: readonly unknown[]) {
-  if (enabledByEnv || runtimeEnabled) {
+  if (loggingEnabled) {
     globalThis.console[method](...args);
-  } else if (runtimeEnabled === undefined) {
-    bufferedWrites.push([method, args]);
+  } else if (loggingEnabled === undefined) {
+    buffer.push([method, args]);
   }
-}
-
-/**
- * Provides the Chrome storage API or reports that it is unavailable.
- */
-function getStorage() {
-  if (typeof chrome === "undefined" || !chrome.storage) {
-    throw new Error("chrome.storage is unavailable");
-  }
-  return chrome.storage;
-}
-
-/**
- * Surfaces a storage failure asynchronously without blocking the current flow.
- */
-function reportAsyncError(error: unknown) {
-  const reportedError =
-    error instanceof Error ? error : new Error(String(error));
-  queueMicrotask(() => {
-    throw reportedError;
-  });
 }
 
 /**

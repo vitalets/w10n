@@ -1,56 +1,74 @@
 /**
- * Verifies logger initialization, startup buffering, and initialization failures.
+ * Verifies initializing logging from environment and storage settings.
  */
-import { afterEach, describe, expect, test, vi } from "vitest";
-import { deferred } from "../../../test-utils/deferred";
+import { afterEach, expect, test } from "vitest";
 import { cleanupLogger, setupLogger } from "./helpers";
 
-describe("initialization", () => {
-  afterEach(cleanupLogger);
+afterEach(cleanupLogger);
 
-  test("buffers writes until stored logging is enabled", async () => {
-    const pendingLoad = deferred<Record<string, unknown>>();
-    const app = await setupLogger({ initialLoad: pendingLoad.promise });
+test("logging is disabled by default", async () => {
+  const app = await setupLogger();
 
-    app.logger.log("started", 1);
-    app.logger.warn("warming up");
-    app.logger.error("not ready");
-    expect(app.writes).toEqual([]);
+  await expect(app.loadLoggingEnabled()).resolves.toBe(false);
+  app.logger.log("foo");
 
-    pendingLoad.resolve({ "logging-enabled": true });
-    await app.loadLoggingEnabled();
+  expect(app.storage.values).toEqual({});
+  expect(app.stdout).toEqual([]);
+});
 
-    expect(app.writes).toEqual([
-      ["log", "started", 1],
-      ["warn", "warming up"],
-      ["error", "not ready"],
-    ]);
+test("LOGGING=1 enables logging by default", async () => {
+  const app = await setupLogger({ env: { LOGGING: "1" } });
+
+  app.logger.log("foo");
+  expect(app.stdout).toEqual([]);
+
+  await app.loadLoggingEnabled();
+
+  expect(app.storage.values).toEqual({});
+  expect(app.stdout).toEqual([["log", "foo"]]);
+});
+
+test("storage value overrides LOGGING=1", async () => {
+  const app = await setupLogger({
+    env: { LOGGING: "1" },
+    storage: { "logging-enabled": false },
   });
 
-  test("reports a missing storage API without blocking import", async () => {
-    const app = await setupLogger({ captureErrors: true, storage: false });
+  const load = app.loadLoggingEnabled();
+  app.logger.log("foo");
+  await load;
+  app.logger.log("bar");
 
-    app.logger.log("discarded");
-    await vi.waitFor(() => expect(app.reportedErrors).toHaveLength(1));
+  expect(app.storage.values).toEqual({ "logging-enabled": false });
+  expect(app.stdout).toEqual([]);
+});
 
-    expect(app.writes).toEqual([]);
-    expect(() => app.reportedErrors[0]!()).toThrow(/chrome\.storage/);
+test("enable logging by storage", async () => {
+  const app = await setupLogger({
+    storage: { "logging-enabled": true },
   });
 
-  test("discards buffered writes and reports a failed initial read", async () => {
-    const pendingLoad = deferred<Record<string, unknown>>();
-    const app = await setupLogger({
-      captureErrors: true,
-      initialLoad: pendingLoad.promise,
-    });
+  app.logger.log("foo");
+  await app.loadLoggingEnabled();
+  app.logger.log("bar");
 
-    app.logger.log("buffered");
-    pendingLoad.reject(new Error("read failed"));
-    await expect(app.loadLoggingEnabled()).rejects.toThrow("read failed");
-    app.logger.log("after failure");
+  expect(app.storage.values).toEqual({ "logging-enabled": true });
+  expect(app.stdout).toEqual([
+    ["log", "foo"],
+    ["log", "bar"],
+  ]);
+});
 
-    expect(app.writes).toEqual([]);
-    expect(app.reportedErrors).toHaveLength(1);
-    expect(() => app.reportedErrors[0]!()).toThrow("read failed");
-  });
+test("a failed load logs the error and keeps logging default", async () => {
+  const app = await setupLogger({ env: { LOGGING: "1" } });
+  app.storage.queueGet(Promise.reject(new Error("read failed")));
+
+  await app.loadLoggingEnabled();
+  app.logger.log("foo");
+
+  expect(app.storage.values).toEqual({});
+  expect(app.stdout).toEqual([
+    ["error", expect.objectContaining({ message: "read failed" })],
+    ["log", "foo"],
+  ]);
 });

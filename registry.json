@@ -20,7 +20,7 @@
       "name": "logger",
       "type": "registry:item",
       "title": "Logger",
-      "description": "A console-compatible logger with build-time forcing and synchronized local-storage controls.",
+      "description": "A console-compatible logger with a build-time default and local-storage controls.",
       "files": [
         {
           "path": "src/logger/index.ts",

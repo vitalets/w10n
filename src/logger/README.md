@@ -1,18 +1,14 @@
 # Logger
 
-A console-compatible logger controlled by `chrome.storage.local`, with
-automatic initialization and synchronization between extension contexts.
+A console-compatible logger with a build-time default that can be replaced from
+`chrome.storage.local`.
 
 ## Features
 
-- Console-compatible methods:
-  * `logger.log`
-  * `logger.info`
-  * `logger.warn`
-  * `logger.error` 
-- Automatic initial loading and startup logs buffering.
-- Logging state is saved in `chrome.storage.local`.
-- Enable in build-time through `LOGGING` env var.
+- Console-compatible `log`, `info`, `warn`, and `error` methods.
+- A build-time default configured through the `LOGGING` environment variable.
+- An explicit loader for applying the setting in `chrome.storage.local`.
+- An immediate setter that also persists the setting.
 
 ## Installation
 
@@ -30,24 +26,32 @@ Add the `storage` permission to the extension manifest:
 
 ## Usage
 
-Start with the console-compatible logger methods:
+Load the persisted setting during extension startup, then use the
+console-compatible logger methods:
 
 ```ts
-import { logger } from "~/src/w10n/logger";
+import { loadLoggingEnabled, logger } from "~/src/w10n/logger";
 
+await loadLoggingEnabled();
 logger.log("Extension started");
 ```
 
-Logging occurs when the stored runtime setting or forced logging is enabled.
-Change the runtime setting for all extension contexts with
-`setLoggingEnabled()`:
+The setting is read from the `logging-enabled` key. If that key does not exist,
+`LOGGING` supplies its default value. Only `true`, `"true"`, and `"1"` enable
+the environment default.
+
+Before the first `loadLoggingEnabled()` call resolves, logger calls are
+buffered. They are flushed in order if loading enables logging and discarded if
+loading disables it. This ensures a stored `false` suppresses startup logs even
+when the environment default is enabled.
+
+Storage read failures are reported with `console.error`. A failure during the
+first load applies the environment default to buffered and future logs.
+
+To change and persist the setting immediately, use `setLoggingEnabled()`:
 
 ```ts
-import { logger, setLoggingEnabled } from "~/src/w10n/logger";
+import { setLoggingEnabled } from "~/src/w10n/logger";
 
 await setLoggingEnabled(true);
-logger.log("foo"); // -> prints "foo"
-
-await setLoggingEnabled(false);
-logger.info("bar"); // -> no output
 ```
