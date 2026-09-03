@@ -5,12 +5,10 @@ const storageKey = "loggingEnabled";
 const defaultLoggingEnabled = booleanEnv(import.meta.env?.LOGGING);
 
 declare global {
-  interface ImportMetaEnv {
-    readonly LOGGING?: string | boolean;
-  }
-
   interface ImportMeta {
-    readonly env: ImportMetaEnv;
+    readonly env: {
+      readonly LOGGING?: string | boolean;
+    }
   }
 }
 
