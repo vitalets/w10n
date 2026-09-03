@@ -1,6 +1,6 @@
 # w10n
 
-`w10n` is a numeronym for “web extension” and a collection of reusable
+`w10n` is a numeronym for “webextension” and a collection of reusable
 WebExtension TypeScript source modules.
 
 Modules are copied into consumer repositories rather than consumed primarily as
