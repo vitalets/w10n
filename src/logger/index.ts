@@ -3,11 +3,11 @@
  */
 const storageKey = "logging-enabled";
 
-export const enabledByEnv = booleanEnv(import.meta.env?.LOGGING_ENABLED);
+export const enabledByEnv = booleanEnv(import.meta.env?.LOGGING);
 
 declare global {
   interface ImportMetaEnv {
-    readonly LOGGING_ENABLED?: string | boolean;
+    readonly LOGGING?: string | boolean;
   }
 
   interface ImportMeta {
