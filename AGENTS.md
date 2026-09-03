@@ -23,13 +23,9 @@ Install dependencies with `npm install`, then use:
 
 - `npm test` — run the Vitest test suite once.
 - `npm run tsc` — type-check all files under `src/` without emitting output.
-- `npm run registry:validate` — manually validate registry metadata and
-  referenced files.
 
-Run `npm test` and `npm run tsc` before handing off a change. Do not run
-`npm run registry:validate` in agentic flows; leave that check for the user to
-run manually. There is currently no build step and no configured lint or format
-command.
+Run `npm test` and `npm run tsc` before handing off a change. There is currently
+no build step and no configured lint or format command.
 
 ## Design constraints
 
@@ -58,8 +54,17 @@ command.
 
 ## Making changes
 
-- Add focused Vitest coverage for behavior changes. Put tests next to the
-  module they cover and name them `*.test.ts`.
+- Before editing, separate the requested behavior changes from existing
+  behavior that must remain.
+- Preserve unmentioned public exports, side effects, persistence behavior, and
+  failure behavior.
+- When a request is ambiguous, implement the narrowest interpretation that
+  preserves compatibility.
+- For asynchronous initialization, define behavior before loading, after
+  success, after failure, and after an explicit update. Ensure older
+  asynchronous work cannot overwrite newer explicit state.
+- Add Vitest coverage for behavior changes. Put tests next to the module they
+  cover and name them `*.test.ts`.
 - When adding, moving, or removing any distributable module file, update that
   module's `files` array in `registry.json`. Registry validation cannot detect a
   new source file omitted from this list.
@@ -69,11 +74,27 @@ command.
   changes.
 - Keep unrelated modules and registry entries untouched.
 
+## Test conventions
+
+- Prefer top-level tests. Use `describe` only when shared scope or setup
+  materially improves readability.
+- Give tests short, behavior-first names using product language rather than
+  implementation terminology.
+- Keep each test focused on one observable behavior and exercise the smallest
+  representative public surface.
+- Use neutral payloads. When order matters, use distinct neutral values.
+- Make test setup mirror real external state with explicit objects and field
+  names. Avoid convenience aliases that hide what is configured.
+- Assert observable state and output instead of mock call details, unless the
+  interaction itself is the contract.
+- Name test-harness results after the observable outcome they contain.
+- Add coverage to an existing behavior-oriented test file when it fits; create
+  another file only for a distinct concern.
+
 ## Adding a module
 
 1. Create `src/<module>/index.ts` with the smallest useful public API.
 2. Add colocated tests for observable behavior.
 3. Add an item to `registry.json` and enumerate every distributable file.
 4. Document installation and usage in `README.md`.
-5. Run `npm test` and `npm run tsc`, then ask the user to run
-   `npm run registry:validate` manually.
+5. Run `npm test` and `npm run tsc`.
