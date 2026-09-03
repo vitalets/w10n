@@ -7,12 +7,17 @@
       "name": "storage",
       "type": "registry:item",
       "title": "Storage",
-      "description": "A scaffold for WebExtension storage source.",
+      "description": "Key-bound WebExtension storage with serialized transformations.",
       "files": [
         {
           "path": "src/storage/index.ts",
           "type": "registry:file",
           "target": "~/src/w10n/storage/index.ts"
+        },
+        {
+          "path": "src/storage/README.md",
+          "type": "registry:file",
+          "target": "~/src/w10n/storage/README.md"
         }
       ]
     },

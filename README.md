@@ -7,6 +7,11 @@ Modules are copied into consumer repositories rather than consumed primarily as
 runtime npm dependencies. The installed source is intended to be inspected,
 modified, and maintained locally, including by coding agents.
 
+## Modules
+
+- [Logger](src/logger/README.md)
+- [Storage](src/storage/README.md)
+
 ## Principles
 
 - Keep each module as self-contained as practical.
@@ -15,34 +20,6 @@ modified, and maintained locally, including by coding agents.
 - Avoid third-party runtime dependencies unless they provide substantial value.
 - Use development-only dependencies in this repository when useful.
 - Do not add abstraction or tooling before there is a concrete need for it.
-
-## Modules
-
-### Logger
-
-`logger` provides console-compatible `log`, `info`, `warn`, and `error`
-methods. It uses `LOGGING` as its build-time default and can load an overriding
-setting from `chrome.storage.local` or update it with `setLoggingEnabled()`.
-
-Install it with:
-
-```sh
-npx shadcn@latest add vitalets/w10n/logger
-```
-
-See the [logger documentation](src/logger/README.md) for setup, usage, and
-runtime behavior.
-
-### Storage
-
-`storage` is currently a scaffold containing an empty public entrypoint. It does
-not expose an API yet.
-
-When the repository is publicly available on GitHub, install it with:
-
-```sh
-npx shadcn@latest add vitalets/w10n/storage
-```
 
 ## Development
 
