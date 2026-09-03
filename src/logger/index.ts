@@ -1,18 +1,18 @@
 /**
  * Provides console-compatible logging with an environment default that can be replaced from extension storage.
  */
-const storageKey = "loggingEnabled";
+const storageKey = 'loggingEnabled';
 const defaultLoggingEnabled = booleanEnv(import.meta.env?.LOGGING);
 
 declare global {
   interface ImportMeta {
     readonly env: {
       readonly LOGGING?: string | boolean;
-    }
+    };
   }
 }
 
-type LogMethod = "log" | "info" | "warn" | "error";
+type LogMethod = 'log' | 'info' | 'warn' | 'error';
 type BufferedWrite = readonly [method: LogMethod, args: readonly unknown[]];
 
 const buffer: BufferedWrite[] = [];
@@ -23,22 +23,22 @@ export const logger = {
   /**
    * Writes a standard log message when logging is enabled.
    */
-  log: (...args: unknown[]) => write("log", args),
+  log: (...args: unknown[]) => write('log', args),
 
   /**
    * Writes an informational message when logging is enabled.
    */
-  info: (...args: unknown[]) => write("info", args),
+  info: (...args: unknown[]) => write('info', args),
 
   /**
    * Writes a warning message when logging is enabled.
    */
-  warn: (...args: unknown[]) => write("warn", args),
+  warn: (...args: unknown[]) => write('warn', args),
 
   /**
    * Writes an error message when logging is enabled.
    */
-  error: (...args: unknown[]) => write("error", args),
+  error: (...args: unknown[]) => write('error', args),
 };
 
 /**
@@ -98,5 +98,5 @@ function write(method: LogMethod, args: readonly unknown[]) {
  * Converts supported environment values into a logging-enabled boolean.
  */
 function booleanEnv(value: unknown) {
-  return value === true || value === "true" || value === "1";
+  return value === true || value === 'true' || value === '1';
 }

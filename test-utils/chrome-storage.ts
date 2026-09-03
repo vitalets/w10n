@@ -1,7 +1,7 @@
 /**
  * Provides a controllable in-memory Chrome storage implementation for tests.
  */
-import { vi } from "vitest";
+import { vi } from 'vitest';
 
 type StorageValues = Record<string, unknown>;
 type StorageKeys = string | string[] | StorageValues | null | undefined;
@@ -13,9 +13,7 @@ export function installChromeStorage(initialValues: StorageValues = {}) {
   const values: StorageValues = { ...initialValues };
   const getResults: Array<Promise<StorageValues> | StorageValues> = [];
   const setResults: Array<Promise<void>> = [];
-  const listeners: Array<
-    Parameters<typeof chrome.storage.onChanged.addListener>[0]
-  > = [];
+  const listeners: Array<Parameters<typeof chrome.storage.onChanged.addListener>[0]> = [];
 
   const get = vi.fn(async (keys?: StorageKeys) => {
     const result = getResults.shift();
@@ -27,7 +25,7 @@ export function installChromeStorage(initialValues: StorageValues = {}) {
     Object.assign(values, items);
   });
 
-  vi.stubGlobal("chrome", {
+  vi.stubGlobal('chrome', {
     storage: {
       local: { get, set },
       onChanged: {
@@ -39,9 +37,9 @@ export function installChromeStorage(initialValues: StorageValues = {}) {
   return {
     emitChange: (
       changes: Record<string, chrome.storage.StorageChange>,
-      areaName: chrome.storage.AreaName = "local",
+      areaName: chrome.storage.AreaName = 'local',
     ) => {
-      if (areaName === "local") applyChanges(values, changes);
+      if (areaName === 'local') applyChanges(values, changes);
       for (const listener of listeners) listener(changes, areaName);
     },
     get,
@@ -61,7 +59,7 @@ export function installChromeStorage(initialValues: StorageValues = {}) {
  */
 function selectValues(values: StorageValues, keys: StorageKeys) {
   if (keys == null) return { ...values };
-  if (typeof keys === "string") return pickValues(values, [keys]);
+  if (typeof keys === 'string') return pickValues(values, [keys]);
   if (Array.isArray(keys)) return pickValues(values, keys);
 
   const result = { ...keys };

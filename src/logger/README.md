@@ -30,10 +30,10 @@ Load the persisted setting during extension startup, then use the
 console-compatible logger methods:
 
 ```ts
-import { loadLoggingEnabled, logger } from "~/src/w10n/logger";
+import { loadLoggingEnabled, logger } from '~/src/w10n/logger';
 
 await loadLoggingEnabled();
-logger.log("Extension started");
+logger.log('Extension started');
 ```
 
 The setting is read from the `loggingEnabled` key. If that key does not exist,
@@ -51,7 +51,7 @@ first load applies the environment default to buffered and future logs.
 To change and persist the setting immediately, use `setLoggingEnabled()`:
 
 ```ts
-import { setLoggingEnabled } from "~/src/w10n/logger";
+import { setLoggingEnabled } from '~/src/w10n/logger';
 
 await setLoggingEnabled(true);
 ```

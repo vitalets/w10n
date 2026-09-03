@@ -1,9 +1,9 @@
 /**
  * Provides logger test helpers for controllable storage, console, and environment values.
  */
-import { vi } from "vitest";
-import { installChromeStorage } from "../../../test-utils/chrome-storage";
-import { captureConsole } from "../../../test-utils/console";
+import { vi } from 'vitest';
+import { installChromeStorage } from '../../../test-utils/chrome-storage';
+import { captureConsole } from '../../../test-utils/console';
 
 interface LoggerSetupOptions {
   env?: {
@@ -17,13 +17,13 @@ interface LoggerSetupOptions {
  */
 export async function setupLogger(options: LoggerSetupOptions = {}) {
   vi.resetModules();
-  vi.stubEnv("LOGGING", options.env?.LOGGING as string | undefined);
+  vi.stubEnv('LOGGING', options.env?.LOGGING as string | undefined);
 
   const storage = installChromeStorage(options.storage);
 
   const stdout = captureConsole();
 
-  const loggerModule = await import("../index");
+  const loggerModule = await import('../index');
   return { ...loggerModule, stdout, storage };
 }
 

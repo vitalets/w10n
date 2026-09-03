@@ -1,17 +1,12 @@
 /**
  * Records console calls for tests that need to inspect ordered output.
  */
-import { vi } from "vitest";
+import { vi } from 'vitest';
 
-export type ConsoleMethod = "log" | "info" | "warn" | "error";
+export type ConsoleMethod = 'log' | 'info' | 'warn' | 'error';
 export type ConsoleWrite = [method: ConsoleMethod, ...args: unknown[]];
 
-const defaultMethods: readonly ConsoleMethod[] = [
-  "log",
-  "info",
-  "warn",
-  "error",
-];
+const defaultMethods: readonly ConsoleMethod[] = ['log', 'info', 'warn', 'error'];
 
 /**
  * Captures calls to the requested console methods in their original order.
