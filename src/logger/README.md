@@ -36,7 +36,7 @@ await loadLoggingEnabled();
 logger.log("Extension started");
 ```
 
-The setting is read from the `logging-enabled` key. If that key does not exist,
+The setting is read from the `loggingEnabled` key. If that key does not exist,
 `LOGGING` supplies its default value. Only `true`, `"true"`, and `"1"` enable
 the environment default.
 

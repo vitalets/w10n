@@ -1,7 +1,7 @@
 /**
  * Provides console-compatible logging with an environment default that can be replaced from extension storage.
  */
-const storageKey = "logging-enabled";
+const storageKey = "loggingEnabled";
 const defaultLoggingEnabled = booleanEnv(import.meta.env?.LOGGING);
 
 declare global {

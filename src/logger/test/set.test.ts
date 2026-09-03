@@ -13,7 +13,7 @@ test("enables logging and saves the setting", async () => {
   app.logger.log("foo");
   await write;
 
-  expect(app.storage.values).toEqual({ "logging-enabled": true });
+  expect(app.storage.values).toEqual({ loggingEnabled: true });
   expect(app.stdout).toEqual([["log", "foo"]]);
 });
 
@@ -24,7 +24,7 @@ test("disables logging and saves the setting", async () => {
   app.logger.log("foo");
   await write;
 
-  expect(app.storage.values).toEqual({ "logging-enabled": false });
+  expect(app.storage.values).toEqual({ loggingEnabled: false });
   expect(app.stdout).toEqual([]);
 });
 
@@ -50,10 +50,10 @@ test("a new setting wins over an older load", async () => {
 
   const load = app.loadLoggingEnabled();
   await app.setLoggingEnabled(true);
-  resolveLoad({ "logging-enabled": false });
+  resolveLoad({ loggingEnabled: false });
   await load;
   app.logger.log("foo");
 
-  expect(app.storage.values).toEqual({ "logging-enabled": true });
+  expect(app.storage.values).toEqual({ loggingEnabled: true });
   expect(app.stdout).toEqual([["log", "foo"]]);
 });

@@ -23,10 +23,13 @@ Install dependencies with `npm install`, then use:
 
 - `npm test` — run the Vitest test suite once.
 - `npm run tsc` — type-check all files under `src/` without emitting output.
-- `npm run registry:validate` — validate registry metadata and referenced files.
+- `npm run registry:validate` — manually validate registry metadata and
+  referenced files.
 
-Run all three checks before handing off a change. There is currently no build
-step and no configured lint or format command.
+Run `npm test` and `npm run tsc` before handing off a change. Do not run
+`npm run registry:validate` in agentic flows; leave that check for the user to
+run manually. There is currently no build step and no configured lint or format
+command.
 
 ## Design constraints
 
@@ -37,6 +40,7 @@ step and no configured lint or format command.
   consumers receiving copied source.
 - Do not add abstractions, configuration, or tooling without a concrete need.
 - Preserve strict TypeScript compatibility and the existing ESM setup.
+- Always use camelCase for storage keys.
 - Begin every source file with a multiline JSDoc block that states the file's
   purpose, and update it whenever that purpose changes.
 - Give every function a multiline JSDoc block that states its purpose. Keep
@@ -71,4 +75,5 @@ step and no configured lint or format command.
 2. Add colocated tests for observable behavior.
 3. Add an item to `registry.json` and enumerate every distributable file.
 4. Document installation and usage in `README.md`.
-5. Run `npm test`, `npm run tsc`, and `npm run registry:validate`.
+5. Run `npm test` and `npm run tsc`, then ask the user to run
+   `npm run registry:validate` manually.

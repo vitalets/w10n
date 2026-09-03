@@ -31,7 +31,7 @@ test("LOGGING=1 enables logging by default", async () => {
 test("storage value overrides LOGGING=1", async () => {
   const app = await setupLogger({
     env: { LOGGING: "1" },
-    storage: { "logging-enabled": false },
+    storage: { loggingEnabled: false },
   });
 
   const load = app.loadLoggingEnabled();
@@ -39,20 +39,20 @@ test("storage value overrides LOGGING=1", async () => {
   await load;
   app.logger.log("bar");
 
-  expect(app.storage.values).toEqual({ "logging-enabled": false });
+  expect(app.storage.values).toEqual({ loggingEnabled: false });
   expect(app.stdout).toEqual([]);
 });
 
 test("enable logging by storage", async () => {
   const app = await setupLogger({
-    storage: { "logging-enabled": true },
+    storage: { loggingEnabled: true },
   });
 
   app.logger.log("foo");
   await app.loadLoggingEnabled();
   app.logger.log("bar");
 
-  expect(app.storage.values).toEqual({ "logging-enabled": true });
+  expect(app.storage.values).toEqual({ loggingEnabled: true });
   expect(app.stdout).toEqual([
     ["log", "foo"],
     ["log", "bar"],
