@@ -56,6 +56,24 @@
           "target": "~/src/w10n/errors/README.md"
         }
       ]
+    },
+    {
+      "name": "context-menu",
+      "type": "registry:item",
+      "title": "Context Menu",
+      "description": "Stable-ID registration for WebExtension context-menu items.",
+      "files": [
+        {
+          "path": "src/context-menu/index.ts",
+          "type": "registry:file",
+          "target": "~/src/w10n/context-menu/index.ts"
+        },
+        {
+          "path": "src/context-menu/README.md",
+          "type": "registry:file",
+          "target": "~/src/w10n/context-menu/README.md"
+        }
+      ]
     }
   ]
 }

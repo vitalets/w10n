@@ -9,6 +9,7 @@ modified, and maintained locally, including by coding agents.
 
 ## Modules
 
+- [Context Menu](src/context-menu/README.md)
 - [Errors](src/errors/README.md)
 - [Logger](src/logger/README.md)
 - [Storage](src/storage/README.md)

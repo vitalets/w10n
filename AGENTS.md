@@ -23,9 +23,12 @@ Install dependencies with `npm install`, then use:
 
 - `npm test` — run the Vitest test suite once.
 - `npm run tsc` — type-check all files under `src/` without emitting output.
+- `npm run prettier` — check formatting across the repository.
+- `npm run registry:validate` — validate registry metadata and distributable files.
 
-Run `npm test` and `npm run tsc` before handing off a change. There is currently
-no build step and no configured lint or format command.
+Run `npm test`, `npm run tsc`, and `npm run prettier` before handing off a
+change. Run `npm run registry:validate` whenever `registry.json` changes. There
+is currently no build step.
 
 ## Design constraints
 
@@ -70,8 +73,17 @@ no build step and no configured lint or format command.
   new source file omitted from this list.
 - Give registry files explicit consumer targets under
   `~/src/w10n/<module>/`.
+- Use canonical terms from `CONTEXT.md` in public APIs, documentation, and tests.
 - Update the module description and `README.md` when its public API or usage
   changes.
+- Write `Key behavior` as the minimum set of primary consumer benefits—usually
+  one. Put requirements, compatibility, implementation details, and edge cases
+  in dedicated sections.
+- Keep each documentation example focused on one module concept. Use `// ...`
+  for app-specific behavior and introduce only APIs required to demonstrate the
+  module.
+- For asynchronous startup examples, wrap setup in a named `init...()` function
+  and invoke it with `void`.
 - Keep unrelated modules and registry entries untouched.
 
 ## Test conventions
