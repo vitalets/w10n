@@ -38,6 +38,24 @@
           "target": "~/src/w10n/logger/README.md"
         }
       ]
+    },
+    {
+      "name": "errors",
+      "type": "registry:item",
+      "title": "Errors",
+      "description": "Async error wrappers for preserving call-site stacks and suppressing expected failures.",
+      "files": [
+        {
+          "path": "src/errors/index.ts",
+          "type": "registry:file",
+          "target": "~/src/w10n/errors/index.ts"
+        },
+        {
+          "path": "src/errors/README.md",
+          "type": "registry:file",
+          "target": "~/src/w10n/errors/README.md"
+        }
+      ]
     }
   ]
 }
