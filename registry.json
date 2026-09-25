@@ -13,11 +13,6 @@
           "path": "src/storage/index.ts",
           "type": "registry:file",
           "target": "~/src/w10n/storage/index.ts"
-        },
-        {
-          "path": "src/storage/README.md",
-          "type": "registry:file",
-          "target": "~/src/w10n/storage/README.md"
         }
       ]
     },
@@ -31,11 +26,6 @@
           "path": "src/logger/index.ts",
           "type": "registry:file",
           "target": "~/src/w10n/logger/index.ts"
-        },
-        {
-          "path": "src/logger/README.md",
-          "type": "registry:file",
-          "target": "~/src/w10n/logger/README.md"
         }
       ]
     },
@@ -49,11 +39,6 @@
           "path": "src/errors/index.ts",
           "type": "registry:file",
           "target": "~/src/w10n/errors/index.ts"
-        },
-        {
-          "path": "src/errors/README.md",
-          "type": "registry:file",
-          "target": "~/src/w10n/errors/README.md"
         }
       ]
     },
@@ -67,11 +52,6 @@
           "path": "src/context-menu/index.ts",
           "type": "registry:file",
           "target": "~/src/w10n/context-menu/index.ts"
-        },
-        {
-          "path": "src/context-menu/README.md",
-          "type": "registry:file",
-          "target": "~/src/w10n/context-menu/README.md"
         }
       ]
     },
@@ -90,11 +70,6 @@
           "path": "src/google-analytics/exceptions.ts",
           "type": "registry:file",
           "target": "~/src/w10n/google-analytics/exceptions.ts"
-        },
-        {
-          "path": "src/google-analytics/README.md",
-          "type": "registry:file",
-          "target": "~/src/w10n/google-analytics/README.md"
         }
       ]
     }
