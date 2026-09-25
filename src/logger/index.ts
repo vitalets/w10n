@@ -1,8 +1,20 @@
 /**
  * Provides console-compatible logging with an environment default that can be replaced from extension storage.
  */
+
+/**
+ * Identifies the persisted logging preference.
+ */
 const storageKey = 'loggingEnabled';
+/**
+ * Supplies the logging preference when storage has no saved value.
+ */
 const defaultLoggingEnabled = booleanEnv(import.meta.env?.LOGGING);
+
+/**
+ * Retains log messages until the initial logging preference is resolved.
+ */
+const buffer: BufferedWrite[] = [];
 
 declare global {
   interface ImportMeta {
@@ -15,10 +27,12 @@ declare global {
 type LogMethod = 'log' | 'info' | 'warn' | 'error';
 type BufferedWrite = readonly [method: LogMethod, args: readonly unknown[]];
 
-const buffer: BufferedWrite[] = [];
 let loggingEnabled: boolean | undefined;
 let stateRevision = 0;
 
+/**
+ * Provides console-compatible methods governed by the logging preference.
+ */
 export const logger = {
   /**
    * Writes a standard log message when logging is enabled.

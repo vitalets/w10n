@@ -43,13 +43,14 @@ export interface StorageItem<T> {
 type WritableStorageAreaName = 'local' | 'session' | 'sync';
 type AsyncTask<T> = () => T | PromiseLike<T>;
 
+/**
+ * Binds queued storage operations to one key and a snapshot of its fallback value.
+ * Must be initialized before the public namespaces create their item subclasses.
+ */
 class StorageItemImplementation<T> implements StorageItem<T> {
   private readonly defaultValue: T;
   private readonly enqueue = createAsyncQueue();
 
-  /**
-   * Binds an item to one key and snapshots its fallback value.
-   */
   constructor(
     private readonly areaName: WritableStorageAreaName,
     private readonly key: string,

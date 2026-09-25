@@ -2,6 +2,20 @@
  * Sends typed extension events and exceptions through the GA4 Measurement Protocol.
  */
 import { createExceptionReporter } from './exceptions';
+
+/**
+ * Receives GA4 Measurement Protocol events.
+ */
+const GA_ENDPOINT = 'https://www.google-analytics.com/mp/collect';
+/**
+ * Limits inactivity before a new analytics session begins.
+ */
+const SESSION_IDLE_MS = 30 * 60_000;
+/**
+ * Bounds each analytics request attempt.
+ */
+const REQUEST_TIMEOUT_MS = 10_000;
+
 export type { ExceptionEvent } from './exceptions';
 
 type AnalyticsParameter = string | number | boolean | undefined;
@@ -37,9 +51,6 @@ type Configuration<Event extends AnalyticsEvent> = [Event] extends [never]
     ? never
     : GoogleAnalyticsOptions;
 type Session = { sessionId: string; timestamp: number };
-const GA_ENDPOINT = 'https://www.google-analytics.com/mp/collect';
-const SESSION_IDLE_MS = 30 * 60_000;
-const REQUEST_TIMEOUT_MS = 10_000;
 
 /**
  * Creates a fixed-configuration analytics client for one extension context.

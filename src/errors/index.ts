@@ -1,7 +1,14 @@
 /**
- * Error helpers.
+ * Preserves useful error stacks and selectively suppresses expected failures.
+ */
+
+/**
+ * Identifies Chromium stack frames during stack inspection.
  */
 const chromiumStackFramePattern = /^\s*at(?:\s|$)/;
+/**
+ * Identifies Firefox and Safari stack frames during stack inspection.
+ */
 const firefoxSafariStackFramePattern = /^(?:.*@)?\S+:\d+(?::\d+)?\s*$/;
 
 /**
@@ -66,13 +73,6 @@ function getCallerFrames(stack: unknown) {
 }
 
 /**
- * Builds a conventional error header for an object without a usable stack string.
- */
-function buildErrorHeader(error: { name?: unknown; message?: unknown }) {
-  return `${error.name || 'Error'}: ${error.message || String(error)}`;
-}
-
-/**
  * Reports whether a thrown value has a message selected for suppression.
  */
 function hasIgnoredErrorMessage(error: unknown, ignoredMessages: readonly string[]) {
@@ -85,6 +85,13 @@ function hasIgnoredErrorMessage(error: unknown, ignoredMessages: readonly string
   } catch {
     return false;
   }
+}
+
+/**
+ * Builds a conventional error header for an object without a usable stack string.
+ */
+function buildErrorHeader(error: { name?: unknown; message?: unknown }) {
+  return `${error.name || 'Error'}: ${error.message || String(error)}`;
 }
 
 /**

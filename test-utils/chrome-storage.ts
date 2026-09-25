@@ -70,17 +70,6 @@ function selectValues(values: StorageValues, keys: StorageKeys) {
 }
 
 /**
- * Copies the requested keys that exist in storage.
- */
-function pickValues(values: StorageValues, keys: string[]) {
-  const result: StorageValues = {};
-  for (const key of keys) {
-    if (key in values) result[key] = values[key];
-  }
-  return result;
-}
-
-/**
  * Updates stored values to reflect an externally emitted change.
  */
 function applyChanges(
@@ -91,4 +80,15 @@ function applyChanges(
     if (change.newValue === undefined) delete values[key];
     else values[key] = change.newValue;
   }
+}
+
+/**
+ * Copies the requested keys that exist in storage.
+ */
+function pickValues(values: StorageValues, keys: string[]) {
+  const result: StorageValues = {};
+  for (const key of keys) {
+    if (key in values) result[key] = values[key];
+  }
+  return result;
 }

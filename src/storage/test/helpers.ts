@@ -110,15 +110,6 @@ function createStorageArea(initialValues: StorageValues = {}) {
 }
 
 /**
- * Creates the native change payload for a stored value.
- */
-function createStorageChange(values: StorageValues, key: string, newValue: unknown) {
-  const change: chrome.storage.StorageChange = { newValue: structuredClone(newValue) };
-  if (key in values) change.oldValue = structuredClone(values[key]);
-  return change;
-}
-
-/**
  * Applies external storage changes to the in-memory area.
  */
 function applyChanges(
@@ -129,6 +120,15 @@ function applyChanges(
     if (change.newValue === undefined) delete values[key];
     else values[key] = structuredClone(change.newValue);
   }
+}
+
+/**
+ * Creates the native change payload for a stored value.
+ */
+function createStorageChange(values: StorageValues, key: string, newValue: unknown) {
+  const change: chrome.storage.StorageChange = { newValue: structuredClone(newValue) };
+  if (key in values) change.oldValue = structuredClone(values[key]);
+  return change;
 }
 
 /**

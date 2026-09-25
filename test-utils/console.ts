@@ -3,10 +3,13 @@
  */
 import { vi } from 'vitest';
 
+/**
+ * Selects the console methods captured by default.
+ */
+const defaultMethods: readonly ConsoleMethod[] = ['log', 'info', 'warn', 'error'];
+
 export type ConsoleMethod = 'log' | 'info' | 'warn' | 'error';
 export type ConsoleWrite = [method: ConsoleMethod, ...args: unknown[]];
-
-const defaultMethods: readonly ConsoleMethod[] = ['log', 'info', 'warn', 'error'];
 
 /**
  * Captures calls to the requested console methods in their original order.
