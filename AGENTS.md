@@ -66,8 +66,7 @@ is currently no build step.
 - For asynchronous initialization, define behavior before loading, after
   success, after failure, and after an explicit update. Ensure older
   asynchronous work cannot overwrite newer explicit state.
-- Add Vitest coverage for behavior changes. Put tests next to the module they
-  cover and name them `*.test.ts`.
+- Add Vitest coverage for behavior changes.
 - When adding, moving, or removing any distributable module file, update that
   module's `files` array in `registry.json`. Registry validation cannot detect a
   new source file omitted from this list.
@@ -88,6 +87,8 @@ is currently no build step.
 
 ## Test conventions
 
+- Always place module tests and module-specific test helpers in
+  `src/<module>/test/`. Name test files `*.test.ts`.
 - Prefer top-level tests. Use `describe` only when shared scope or setup
   materially improves readability.
 - Give tests short, behavior-first names using product language rather than
@@ -106,7 +107,7 @@ is currently no build step.
 ## Adding a module
 
 1. Create `src/<module>/index.ts` with the smallest useful public API.
-2. Add colocated tests for observable behavior.
+2. Add tests for observable behavior following the test conventions above.
 3. Add an item to `registry.json` and enumerate every distributable file.
 4. Document installation and usage in `README.md`.
 5. Run `npm test` and `npm run tsc`.

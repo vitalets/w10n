@@ -74,6 +74,29 @@
           "target": "~/src/w10n/context-menu/README.md"
         }
       ]
+    },
+    {
+      "name": "google-analytics",
+      "type": "registry:item",
+      "title": "Google Analytics",
+      "description": "Typed GA4 events and bounded exception reporting for extension contexts.",
+      "files": [
+        {
+          "path": "src/google-analytics/index.ts",
+          "type": "registry:file",
+          "target": "~/src/w10n/google-analytics/index.ts"
+        },
+        {
+          "path": "src/google-analytics/exceptions.ts",
+          "type": "registry:file",
+          "target": "~/src/w10n/google-analytics/exceptions.ts"
+        },
+        {
+          "path": "src/google-analytics/README.md",
+          "type": "registry:file",
+          "target": "~/src/w10n/google-analytics/README.md"
+        }
+      ]
     }
   ]
 }
