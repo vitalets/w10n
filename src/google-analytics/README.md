@@ -43,7 +43,7 @@ by [GA4 Measurement Protocol](https://developers.google.com/analytics/devguides/
 Define separate event types and combine them into an explicit union:
 
 ```ts
-import { createGoogleAnalytics } from '~/src/w10n/google-analytics';
+import { createGoogleAnalytics } from './w10n/google-analytics';
 
 type SettingChangedEvent = {
   name: 'setting_changed';

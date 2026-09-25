@@ -29,7 +29,7 @@ Add the `storage` permission to the extension manifest:
 Import the logger and use its console-compatible methods immediately:
 
 ```ts
-import { logger } from '~/src/w10n/logger';
+import { logger } from './w10n/logger';
 
 logger.log('Extension started');
 ```
@@ -51,7 +51,7 @@ Call `loadLoggingEnabled()` only when you need to reload the setting from storag
 To change and persist the setting immediately, use `setLoggingEnabled()`:
 
 ```ts
-import { setLoggingEnabled } from '~/src/w10n/logger';
+import { setLoggingEnabled } from './w10n/logger';
 
 await setLoggingEnabled(true);
 ```

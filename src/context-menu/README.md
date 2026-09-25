@@ -34,7 +34,7 @@ Use a stable string ID so the same call can update an item left behind by an
 earlier service-worker instance:
 
 ```ts
-import { upsertContextMenu } from '~/src/w10n/context-menu';
+import { upsertContextMenu } from './w10n/context-menu';
 
 async function initContextMenu() {
   const menuId = 'open-dashboard';

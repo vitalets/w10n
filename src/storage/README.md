@@ -32,7 +32,7 @@ Add the `storage` permission to the extension manifest:
 Create and export one shared item instance per key in each extension context:
 
 ```ts
-import { storage } from '~/src/w10n/storage';
+import { storage } from './w10n/storage';
 
 interface Group {
   id: string;

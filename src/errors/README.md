@@ -23,7 +23,7 @@ Wrap asynchronous browser calls whose rejected errors may contain only a
 message:
 
 ```ts
-import { withErrorStack } from '~/src/w10n/errors';
+import { withErrorStack } from './w10n/errors';
 
 void withErrorStack(() => chrome.tabs.create({ url }));
 ```
@@ -42,7 +42,7 @@ failure.
 Call `ignoreErrors` without a message list to suppress every failure:
 
 ```ts
-import { ignoreErrors } from '~/src/w10n/errors';
+import { ignoreErrors } from './w10n/errors';
 
 await ignoreErrors(() => chrome.tabs.create({ url }));
 ```
