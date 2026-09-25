@@ -8,6 +8,7 @@
     "prettier:w": "prettier --write --ignore-unknown .",
     "tsc": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
+    "update:rules": "cp ../agentic-dev/rules/ts-file-structure/ts-file-structure.md .agents/rules/",
     "registry:validate": "npx --yes shadcn@latest registry validate"
   },
   "devDependencies": {
