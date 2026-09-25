@@ -9,20 +9,13 @@ const storageKey = 'loggingEnabled';
 /**
  * Supplies the logging preference when storage has no saved value.
  */
+// @ts-ignore -- The consuming project's bundler supplies import.meta.env and its types.
 const defaultLoggingEnabled = booleanEnv(import.meta.env?.LOGGING);
 
 /**
  * Retains log messages until the initial logging preference is resolved.
  */
 const buffer: BufferedWrite[] = [];
-
-declare global {
-  interface ImportMeta {
-    readonly env: {
-      readonly LOGGING?: string | boolean;
-    };
-  }
-}
 
 type LogMethod = 'log' | 'info' | 'warn' | 'error';
 type BufferedWrite = readonly [method: LogMethod, args: readonly unknown[]];
