@@ -163,6 +163,7 @@ test('debug mode uses the normal endpoint and snapshots configuration', async ()
 test('retries network failures with the original metadata and payload', async () => {
   fetchMock
     .mockRejectedValueOnce(new Error('private request'))
+    .mockRejectedValueOnce(new Error('private request'))
     .mockRejectedValueOnce(new Error('private request'));
   const result = client().sendEvent('opened');
   await vi.advanceTimersByTimeAsync(0);
@@ -173,8 +174,10 @@ test('retries network failures with the original metadata and payload', async ()
   await vi.advanceTimersByTimeAsync(1);
   expect(requests).toHaveLength(2);
   await vi.advanceTimersByTimeAsync(2000);
-  expect(await result).toBe(true);
   expect(requests).toHaveLength(3);
+  await vi.advanceTimersByTimeAsync(3000);
+  expect(await result).toBe(true);
+  expect(requests).toHaveLength(4);
   expect(new Set(requests.map((request) => request.body)).size).toBe(1);
   expect(setStorage).toHaveBeenCalledTimes(1);
   expect(failures).toEqual([]);
@@ -192,18 +195,45 @@ test('reports final network failure without exposing request details', async () 
   const result = client().sendEvent('opened');
   await vi.runAllTimersAsync();
   expect(await result).toBe(false);
-  expect(failures).toEqual([{ category: 'network', attempts: 3 }]);
+  expect(failures).toEqual([{ category: 'network', attempts: 4 }]);
 });
 
-test('aborts each timed out request and stops after three attempts', async () => {
+test('aborts each timed out request and stops after three retries', async () => {
   fetchMock.mockImplementation(() => new Promise(() => {}));
   const result = client().sendEvent('opened');
   await vi.runAllTimersAsync();
   expect(await result).toBe(false);
-  expect(requests).toHaveLength(3);
+  expect(requests).toHaveLength(4);
   expect(requests.every((request) => request.signal.aborted)).toBe(true);
-  expect(failures).toEqual([{ category: 'timeout', attempts: 3 }]);
+  expect(failures).toEqual([{ category: 'timeout', attempts: 4 }]);
 });
+
+test.each([0, 1, 4])('limits network retries to %s', async (retries) => {
+  fetchMock.mockRejectedValue(new Error('network failure'));
+  const result = client({ retries }).sendEvent('opened');
+  await vi.runAllTimersAsync();
+  expect(await result).toBe(false);
+  expect(requests).toHaveLength(retries + 1);
+  expect(failures).toEqual([{ category: 'network', attempts: retries + 1 }]);
+});
+
+test('disables timeout retries when retries is zero', async () => {
+  fetchMock.mockImplementation(() => new Promise(() => {}));
+  const result = client({ retries: 0 }).sendException('example');
+  await vi.runAllTimersAsync();
+  expect(await result).toBe(false);
+  expect(requests).toHaveLength(1);
+  expect(requests[0].signal.aborted).toBe(true);
+  expect(failures).toEqual([{ category: 'timeout', attempts: 1 }]);
+});
+
+test.each([-1, 1.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1])(
+  'rejects invalid retries %s during creation',
+  (retries) => {
+    expect(() => client({ retries })).toThrow('retries');
+    expect(requests).toEqual([]);
+  },
+);
 
 test('storage failure does not poison later sends', async () => {
   getStorage.mockRejectedValueOnce(new Error('private storage data'));

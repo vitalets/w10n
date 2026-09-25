@@ -32,6 +32,7 @@ export type GoogleAnalyticsOptions = {
   clientId: string;
   enabled?: boolean;
   debug?: boolean;
+  retries?: number;
   sessionStorageKey?: string;
   onError?: (failure: AnalyticsFailure) => void | Promise<void>;
   preprocessExceptionMessage?: (message: string) => string;
@@ -63,6 +64,10 @@ export function createGoogleAnalytics<Event extends AnalyticsEvent = never>(
     if (typeof config[key] !== 'string' || !config[key].trim()) {
       throw new Error(`Missing or invalid analytics ${key}`);
     }
+  }
+  const retries = config.retries ?? 3;
+  if (!Number.isSafeInteger(retries) || retries < 0) {
+    throw new Error('Invalid analytics retries: expected a non-negative safe integer');
   }
   const url = new URL(GA_ENDPOINT);
   url.searchParams.set('measurement_id', config.measurementId);
@@ -126,14 +131,14 @@ export function createGoogleAnalytics<Event extends AnalyticsEvent = never>(
    * Retries only ambiguous network failures while retaining the original payload.
    */
   async function transmit(body: string) {
-    for (let attempts = 1; attempts <= 3; attempts++) {
+    for (let attempts = 1; attempts <= retries + 1; attempts++) {
       const result = await request(url.href, body);
       if (result.category === 'http') {
         if (result.ok) return true;
         notify({ category: 'http', status: result.status, attempts });
         return false;
       }
-      if (attempts === 3) {
+      if (attempts === retries + 1) {
         notify({ category: result.category, attempts });
         return false;
       }

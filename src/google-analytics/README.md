@@ -1,6 +1,6 @@
 # Google Analytics
 
-Typed GA4 events and bounded exception reporting for extension contexts.
+Typed GA4 events and bounded exception reporting with configurable delivery retries.
 
 ## Key behavior
 
@@ -82,13 +82,15 @@ appended; it cannot be included in the application event union.
 | `clientId`                   | Required                 | Extension-owned installation identity               |
 | `enabled`                    | `true`                   | Enables sending                                     |
 | `debug`                      | `false`                  | Adds `debug_mode` on the normal collection endpoint |
+| `retries`                    | `3`                      | Retries after the initial network attempt           |
 | `sessionStorageKey`          | `googleAnalyticsSession` | Shared session storage key                          |
 | `onError`                    | Optional                 | Receives sanitized failure details                  |
 | `preprocessExceptionMessage` | Optional                 | Transforms normalized exception descriptions        |
 
 Configuration is copied at creation and fixed for the client lifetime. Missing,
 non-string, or blank identifiers throw synchronously, including for disabled
-clients. Disabled sends return false without storage or network operations.
+clients. `retries` must be a non-negative safe integer; invalid values also throw
+synchronously. Set `retries: 0` to disable retries. Disabled sends return false without storage or network operations.
 
 ## Exceptions
 
@@ -180,7 +182,9 @@ extension reload, update, or disable. No persistent event queue is maintained.
 Both sending methods resolve to `true` on HTTP success and `false` when skipped
 or failed. Preparation and sending failures never reject. HTTP success does not
 guarantee GA processing. Network errors and ten-second request timeouts receive
-up to three attempts, with one- and two-second waits. Retries reuse the serialized
+up to three retries by default (four attempts total), with one-, two-, and
+three-second waits. The `retries` option controls this limit; each successive
+retry waits one second longer. Retries reuse the serialized
 payload and may produce duplicates. HTTP failures, including 429 and 5xx, are not
 retried; `Retry-After` is ignored.
 

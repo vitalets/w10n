@@ -79,7 +79,7 @@
       "name": "google-analytics",
       "type": "registry:item",
       "title": "Google Analytics",
-      "description": "Typed GA4 events and bounded exception reporting for extension contexts.",
+      "description": "Typed GA4 events and bounded exception reporting with configurable delivery retries.",
       "files": [
         {
           "path": "src/google-analytics/index.ts",
