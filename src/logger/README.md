@@ -1,13 +1,13 @@
 # Logger
 
-A console-compatible logger with a build-time default that can be replaced from
-`chrome.storage.local`.
+A console-compatible logger that automatically loads its preference from
+`chrome.storage.local`, with a build-time default.
 
 ## Features
 
 - Console-compatible `log`, `info`, `warn`, and `error` methods.
 - A build-time default configured through the `LOGGING` environment variable.
-- An explicit loader for applying the setting in `chrome.storage.local`.
+- Automatic loading of the setting in `chrome.storage.local`.
 - An immediate setter that also persists the setting.
 
 ## Installation
@@ -26,13 +26,11 @@ Add the `storage` permission to the extension manifest:
 
 ## Usage
 
-Load the persisted setting during extension startup, then use the
-console-compatible logger methods:
+Import the logger and use its console-compatible methods immediately:
 
 ```ts
-import { loadLoggingEnabled, logger } from '~/src/w10n/logger';
+import { logger } from '~/src/w10n/logger';
 
-await loadLoggingEnabled();
 logger.log('Extension started');
 ```
 
@@ -40,13 +38,15 @@ The setting is read from the `loggingEnabled` key. If that key does not exist,
 `LOGGING` supplies its default value. Only `true`, `"true"`, and `"1"` enable
 the environment default.
 
-Before the first `loadLoggingEnabled()` call resolves, logger calls are
-buffered. They are flushed in order if loading enables logging and discarded if
-loading disables it. This ensures a stored `false` suppresses startup logs even
-when the environment default is enabled.
+The setting loads automatically when the module is imported. Until that initial
+load resolves, logger calls are buffered. They are flushed in order if loading
+enables logging and discarded if loading disables it. This ensures a stored
+`false` suppresses startup logs even when the environment default is enabled.
 
 Storage read failures are reported with `console.error`. A failure during the
 first load applies the environment default to buffered and future logs.
+
+Call `loadLoggingEnabled()` only when you need to reload the setting from storage.
 
 To change and persist the setting immediately, use `setLoggingEnabled()`:
 

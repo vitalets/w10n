@@ -12,7 +12,7 @@ modified, and maintained locally, including by coding agents.
 - [Context Menu](src/context-menu/README.md)
 - [Errors](src/errors/README.md)
 - [Google Analytics](src/google-analytics/README.md)
-- [Logger](src/logger/README.md)
+- [Logger](src/logger/README.md) — console-compatible logging with automatic storage initialization.
 - [Storage](src/storage/README.md)
 
 ## Principles

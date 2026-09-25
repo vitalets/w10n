@@ -10,6 +10,7 @@ interface LoggerSetupOptions {
     LOGGING?: string | boolean;
   };
   storage?: Record<string, unknown>;
+  initialLoad?: Promise<Record<string, unknown>>;
 }
 
 /**
@@ -20,6 +21,7 @@ export async function setupLogger(options: LoggerSetupOptions = {}) {
   vi.stubEnv('LOGGING', options.env?.LOGGING as string | undefined);
 
   const storage = installChromeStorage(options.storage);
+  if (options.initialLoad) storage.queueGet(options.initialLoad);
 
   const stdout = captureConsole();
 

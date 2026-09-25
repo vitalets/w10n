@@ -1,5 +1,5 @@
 /**
- * Provides console-compatible logging with an environment default that can be replaced from extension storage.
+ * Provides console-compatible logging that automatically loads its preference from extension storage.
  */
 
 /**
@@ -55,6 +55,8 @@ export const logger = {
   error: (...args: unknown[]) => write('error', args),
 };
 
+void loadLoggingEnabled();
+
 /**
  * Applies the logging setting immediately and persists it for future loads.
  */
@@ -98,7 +100,7 @@ function applyLoggingEnabled(enabled: boolean) {
 }
 
 /**
- * Sends a message when logging is enabled or buffers it before the first load.
+ * Sends a message when logging is enabled or buffers it until the initial preference is resolved.
  */
 function write(method: LogMethod, args: readonly unknown[]) {
   if (loggingEnabled) {
