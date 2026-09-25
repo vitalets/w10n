@@ -5,7 +5,7 @@ WebExtension TypeScript source modules.
 
 Modules are copied into consumer repositories rather than consumed primarily as
 runtime npm dependencies. The installed source is intended to be inspected,
-modified, and maintained locally, including by coding agents.
+modified, and maintained locally, including by AI agents.
 
 ## Modules
 
