@@ -46,7 +46,7 @@ enables logging and discarded if loading disables it. This ensures a stored
 Storage read failures are reported with `console.error`. A failure during the
 first load applies the environment default to buffered and future logs.
 
-Call `loadLoggingEnabled()` only when you need to reload the setting from storage.
+Call `loadLoggingEnabled()` only when you need to read the setting from storage.
 
 To change and persist the setting immediately, use `setLoggingEnabled()`:
 
