@@ -199,3 +199,23 @@ attempts. Final transport failure notifies once; skipping alone does not notify.
 Details exclude credentials, request URLs, payloads, and thrown values. Callback
 exceptions and rejections are contained, and transport failures are never reported
 as analytics events.
+
+## Differences from WXT Analytics
+
+[WXT Analytics](https://wxt.dev/analytics.html) is a provider-based analytics package
+that works with or without WXT. This module focuses on typed GA4 events and bounded
+exception reporting through source you copy into your project.
+
+| Area               | This module                                                                                   | WXT Analytics                                                                                           |
+| ------------------ | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Installation       | Source copied through the shadcn registry; no runtime dependencies                            | `@wxt-dev/analytics` npm package, with optional WXT module integration                                  |
+| Providers          | GA4 Measurement Protocol only                                                                 | GA4 Measurement Protocol, Moderok, PostHog, Umami, and custom providers                                 |
+| Tracking API       | `sendEvent` with an application-defined union correlating event names and parameters          | `track`, `page`, `identify`, and `autoTrack` for UI clicks                                              |
+| Extension contexts | Background workers and extension-owned pages send directly; content scripts are outside scope | Supports content-script UI tracking and requires background initialization when used without WXT        |
+| Identity           | The extension supplies and persists `clientId`                                                | `identify` manages user ID and properties, stored in local storage by default with customizable storage |
+| Enablement         | Enabled by default; `enabled` is fixed for each client's lifetime                             | Disabled by default; runtime changes through `setEnabled`                                               |
+
+This module also provides exception normalization, deduplication, a per-client
+reporting cap, and configurable retries for network errors and timeouts. See
+[Exceptions](#exceptions) and [Sessions and delivery](#sessions-and-delivery) for
+the exact behavior and limits.
