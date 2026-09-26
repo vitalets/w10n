@@ -9,8 +9,7 @@ const storageKey = 'loggingEnabled';
 /**
  * Supplies the logging preference when storage has no saved value.
  */
-// @ts-ignore -- The consuming project's bundler supplies import.meta.env and its types.
-const defaultLoggingEnabled = booleanEnv(import.meta.env?.LOGGING);
+const defaultLoggingEnabled = booleanEnv((import.meta.env as { LOGGING?: string })?.LOGGING);
 
 /**
  * Retains log messages until the initial logging preference is resolved.
