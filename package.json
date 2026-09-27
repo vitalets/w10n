@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
+    "lint": "eslint .",
     "prettier": "prettier --check --ignore-unknown .",
     "prettier:w": "prettier --write --ignore-unknown .",
     "tsc": "tsc --noEmit",
@@ -13,9 +14,13 @@
     "registry:validate": "npx --yes shadcn@latest registry validate"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/chrome": "^0.2.8",
+    "eslint": "^10.11.0",
+    "globals": "^17.12.0",
     "prettier": "^3.9.6",
-    "typescript": "^7.0.2",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.70.1",
     "vitest": "^4.1.11"
   },
   "prettier": {

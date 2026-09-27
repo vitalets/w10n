@@ -35,8 +35,12 @@ and CRXJS. See its README for setup and usage.
 npm install
 npm test
 npm run tsc
+npm run lint
 npm run registry:validate
 ```
+
+ESLint uses the recommended JavaScript and TypeScript rules and respects the root
+and example `.gitignore` files. Run `npm run lint -- --fix` to apply available fixes.
 
 > When adding or removing distributable files in a module, update its `files`
 > list in `registry.json`.
