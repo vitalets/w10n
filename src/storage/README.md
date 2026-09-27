@@ -112,3 +112,18 @@ timing and do not run through the item queue.
 Defaults must be valid structured-cloneable WebExtension storage values. The module
 supports writable areas only; managed storage remains available through the native
 read-only API.
+
+## Comparison with WXT Storage
+
+w10n makes **updating stored arrays and objects safer**. You can add or remove
+collection entries and change object fields without overlapping updates losing
+each other's changes, provided they use `set()` transformations on the same shared
+item instance. Updates from separate extension contexts still need coordination.
+
+[WXT Storage](https://wxt.dev/storage.html) supports arrays and objects too, but
+preventing those lost updates requires your own coordination. It offers more
+built-in features, including migrations, initialization, and bulk operations.
+w10n focuses on safer updates through a small, dependency-free module you own.
+
+See the [research notes](../../docs/research/wxt-storage-comparison.md) for the
+comparison against `@wxt-dev/storage` 1.2.9 and supporting sources.
