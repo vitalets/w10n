@@ -15,6 +15,11 @@ modified, and maintained locally, including by AI agents.
 - [Google Analytics](src/google-analytics/README.md)
 - [Context Menu](src/context-menu/README.md)
 
+## Example extension
+
+The [example extension](example/README.md) uses all modules with vanilla TypeScript
+and CRXJS. See its README for setup and usage.
+
 ## Principles
 
 - Keep each module as self-contained as practical.

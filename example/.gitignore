@@ -1,0 +1,4 @@
+dist/
+release/
+.env.local
+.env.*.local
