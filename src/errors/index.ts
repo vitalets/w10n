@@ -45,20 +45,28 @@ export async function ignoreErrors<T>(
  */
 function attachMissingStackFrames(error: unknown, callSiteError: Error) {
   try {
-    if (!error || typeof error !== 'object') return;
-
-    const errorWithStack = error as { stack?: unknown; name?: unknown; message?: unknown };
-    const stack = errorWithStack.stack;
-    if (hasStackFrames(stack)) return;
-
-    const callerFrames = getCallerFrames(callSiteError.stack);
-    if (!callerFrames.length) return;
-
-    const errorHeader = stack || buildErrorHeader(errorWithStack);
-    errorWithStack.stack = [errorHeader, ...callerFrames].join('\n');
+    if (!isErrorObject(error)) return;
+    enrichStack(error, callSiteError);
   } catch {
     // Stack enrichment must never replace or mask the original error.
   }
+}
+
+/**
+ * Adds available caller frames to an error that lacks browser stack frames.
+ */
+function enrichStack(
+  errorWithStack: { stack?: unknown; name?: unknown; message?: unknown },
+  callSiteError: Error,
+) {
+  const stack = errorWithStack.stack;
+  if (hasStackFrames(stack)) return;
+
+  const callerFrames = getCallerFrames(callSiteError.stack);
+  if (!callerFrames.length) return;
+
+  const errorHeader = stack || buildErrorHeader(errorWithStack);
+  errorWithStack.stack = [errorHeader, ...callerFrames].join('\n');
 }
 
 /**
@@ -78,7 +86,7 @@ function getCallerFrames(stack: unknown) {
 function hasIgnoredErrorMessage(error: unknown, ignoredMessages: readonly string[]) {
   try {
     if (typeof error === 'string') return ignoredMessages.includes(error);
-    if (!error || typeof error !== 'object') return false;
+    if (!isErrorObject(error)) return false;
 
     const message = (error as { message?: unknown }).message;
     return typeof message === 'string' && ignoredMessages.includes(message);
@@ -106,4 +114,13 @@ function hasStackFrames(stack: unknown) {
  */
 function isStackFrame(line: string) {
   return chromiumStackFramePattern.test(line) || firefoxSafariStackFramePattern.test(line);
+}
+
+/**
+ * Recognizes thrown objects whose optional error properties can be inspected.
+ */
+function isErrorObject(
+  error: unknown,
+): error is { stack?: unknown; name?: unknown; message?: unknown } {
+  return error !== null && typeof error === 'object';
 }

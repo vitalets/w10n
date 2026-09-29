@@ -27,12 +27,28 @@ function checkTypes() {
   analytics.sendEvent('optional', { value: 1 });
   analytics.sendEvent('maybe');
   analytics.sendEvent('maybe', { value: 1 });
+  expectTypeOf(analytics.sendException('example')).toEqualTypeOf<Promise<boolean>>();
+}
+
+/**
+ * Rejects unsupported event declarations during TypeScript checking.
+ */
+function checkEventDeclarations() {
   // @ts-expect-error An event union must be supplied explicitly.
   createGoogleAnalytics(options);
   // @ts-expect-error Application events cannot redefine exception.
   createGoogleAnalytics<Events | ExceptionEvent>(options);
   // @ts-expect-error Unrestricted event names would include exception.
   createGoogleAnalytics<{ name: string }>(options);
+  // @ts-expect-error Non-primitive parameters are unsupported.
+  createGoogleAnalytics<{ name: 'invalid'; params: { value: object } }>(options);
+}
+
+/**
+ * Rejects event arguments that violate the declared name and parameter contract.
+ */
+function checkEventArguments() {
+  const analytics = createGoogleAnalytics<Events>(options);
   // @ts-expect-error Required parameters cannot be omitted.
   analytics.sendEvent('changed');
   // @ts-expect-error Required parameters cannot be undefined.
@@ -49,11 +65,10 @@ function checkTypes() {
   analytics.sendEvent('unknown');
   // @ts-expect-error Exceptions must use sendException.
   analytics.sendEvent('exception', { description: 'example' });
-  // @ts-expect-error Non-primitive parameters are unsupported.
-  createGoogleAnalytics<{ name: 'invalid'; params: { value: object } }>(options);
   const name = '' as 'changed' | 'optional';
   // @ts-expect-error A union name cannot bypass name-parameter correlation.
   analytics.sendEvent(name, { value: 1 });
-  expectTypeOf(analytics.sendException('example')).toEqualTypeOf<Promise<boolean>>();
 }
 void checkTypes;
+void checkEventDeclarations;
+void checkEventArguments;

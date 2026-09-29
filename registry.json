@@ -70,6 +70,16 @@
           "path": "src/google-analytics/exceptions.ts",
           "type": "registry:file",
           "target": "~/src/w10n/google-analytics/exceptions.ts"
+        },
+        {
+          "path": "src/google-analytics/session.ts",
+          "type": "registry:file",
+          "target": "~/src/w10n/google-analytics/session.ts"
+        },
+        {
+          "path": "src/google-analytics/transport.ts",
+          "type": "registry:file",
+          "target": "~/src/w10n/google-analytics/transport.ts"
         }
       ]
     }

@@ -10,47 +10,69 @@ type StorageKeys = string | string[] | StorageValues | null | undefined;
  * Installs stateful Chrome storage with optional outcomes queued for individual operations.
  */
 export function installChromeStorage(initialValues: StorageValues = {}) {
-  const values: StorageValues = { ...initialValues };
-  const getResults: Array<Promise<StorageValues> | StorageValues> = [];
-  const setResults: Array<Promise<void>> = [];
-  const listeners: Array<Parameters<typeof chrome.storage.onChanged.addListener>[0]> = [];
-
-  const get = vi.fn(async (keys?: StorageKeys) => {
-    const result = getResults.shift();
-    return result === undefined ? selectValues(values, keys) : await result;
-  });
-  const set = vi.fn(async (items: StorageValues) => {
-    const result = setResults.shift();
-    if (result) await result;
-    Object.assign(values, items);
-  });
-
+  const storage = new ChromeStorage(initialValues);
   vi.stubGlobal('chrome', {
     storage: {
-      local: { get, set },
-      onChanged: {
-        addListener: vi.fn((listener) => listeners.push(listener)),
-      },
+      local: { get: storage.get, set: storage.set },
+      onChanged: { addListener: vi.fn((listener) => storage.listeners.push(listener)) },
     },
   } as unknown as typeof chrome);
+  return storage;
+}
 
-  return {
-    emitChange: (
-      changes: Record<string, chrome.storage.StorageChange>,
-      areaName: chrome.storage.AreaName = 'local',
-    ) => {
-      if (areaName === 'local') applyChanges(values, changes);
-      for (const listener of listeners) listener(changes, areaName);
-    },
-    get,
-    queueGet: (result: Promise<StorageValues> | StorageValues) => {
-      getResults.push(result);
-    },
-    queueSet: (result: Promise<void>) => {
-      setResults.push(result);
-    },
-    set,
-    values,
+/**
+ * Tracks local storage and controlled operation outcomes for consumers.
+ */
+class ChromeStorage {
+  readonly values: StorageValues;
+  readonly listeners: Array<Parameters<typeof chrome.storage.onChanged.addListener>[0]> = [];
+  private getResults: Array<Promise<StorageValues> | StorageValues> = [];
+  private setResults: Array<Promise<void>> = [];
+
+  constructor(initialValues: StorageValues) {
+    this.values = { ...initialValues };
+  }
+
+  /**
+   * Reads requested values or the next queued outcome.
+   */
+  get = vi.fn(async (keys?: StorageKeys) => {
+    const result = this.getResults.shift();
+    return result === undefined ? selectValues(this.values, keys) : await result;
+  });
+
+  /**
+   * Applies a write after its controlled outcome settles.
+   */
+  set = vi.fn(async (items: StorageValues) => {
+    const result = this.setResults.shift();
+    if (result) await result;
+    Object.assign(this.values, items);
+  });
+
+  /**
+   * Delivers an external storage update to registered listeners.
+   */
+  emitChange = (
+    changes: Record<string, chrome.storage.StorageChange>,
+    areaName: chrome.storage.AreaName = 'local',
+  ) => {
+    if (areaName === 'local') applyChanges(this.values, changes);
+    for (const listener of this.listeners) listener(changes, areaName);
+  };
+
+  /**
+   * Controls the next storage read.
+   */
+  queueGet = (result: Promise<StorageValues> | StorageValues) => {
+    this.getResults.push(result);
+  };
+
+  /**
+   * Controls the next storage write.
+   */
+  queueSet = (result: Promise<void>) => {
+    this.setResults.push(result);
   };
 }
 
@@ -62,11 +84,7 @@ function selectValues(values: StorageValues, keys: StorageKeys) {
   if (typeof keys === 'string') return pickValues(values, [keys]);
   if (Array.isArray(keys)) return pickValues(values, keys);
 
-  const result = { ...keys };
-  for (const key of Object.keys(keys)) {
-    if (key in values) result[key] = values[key];
-  }
-  return result;
+  return { ...keys, ...pickValues(values, Object.keys(keys)) };
 }
 
 /**

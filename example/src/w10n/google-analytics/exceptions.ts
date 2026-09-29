@@ -21,64 +21,59 @@ type ReporterOptions = {
  * Creates one exception reporter whose limits persist across capture registrations.
  */
 export function createExceptionReporter(options: ReporterOptions) {
-  const reported = new Set<string>();
-  let stopCapture: (() => void) | undefined;
-  return { sendException, captureExceptions };
+  const reporter = new ExceptionReporter(options);
+  return { sendException: reporter.sendException, captureExceptions: reporter.captureExceptions };
+}
+
+/**
+ * Retains exception limits and listener ownership for one analytics client.
+ */
+class ExceptionReporter {
+  private reported = new Set<string>();
+  private stopCapture: (() => void) | undefined;
+
+  constructor(private options: ReporterOptions) {}
 
   /**
    * Reports a manually caught value using the client's shared exception limits.
    */
-  function sendException(reason: unknown) {
-    return report('caught_error', reason);
-  }
+  sendException = (reason: unknown) => {
+    return this.report('caught_error', reason);
+  };
 
   /**
    * Registers one pair of automatic listeners until their cleanup is invoked.
    */
-  function captureExceptions() {
-    if (stopCapture) return stopCapture;
-    globalThis.addEventListener('error', onError);
-    globalThis.addEventListener('unhandledrejection', onRejection);
+  captureExceptions = () => {
+    if (this.stopCapture) return this.stopCapture;
+    globalThis.addEventListener('error', this.onError);
+    globalThis.addEventListener('unhandledrejection', this.onRejection);
     let active = true;
     /**
      * Removes this registration without affecting manual reporting or later capture.
      */
-    stopCapture = () => {
+    this.stopCapture = () => {
       if (!active) return;
       active = false;
-      globalThis.removeEventListener('error', onError);
-      globalThis.removeEventListener('unhandledrejection', onRejection);
-      stopCapture = undefined;
+      globalThis.removeEventListener('error', this.onError);
+      globalThis.removeEventListener('unhandledrejection', this.onRejection);
+      this.stopCapture = undefined;
     };
-    return stopCapture;
-  }
+    return this.stopCapture;
+  };
 
   /**
    * Normalizes and records a unique exception before dispatching it.
    */
-  async function report(kind: ExceptionEvent['params']['error_kind'], reason: unknown) {
-    if (!options.enabled) return false;
+  private async report(kind: ExceptionEvent['params']['error_kind'], reason: unknown) {
+    if (!this.options.enabled) return false;
     try {
       let description = getDescription(reason);
       const stack = getStack(reason, description);
-      if (options.preprocess) {
-        try {
-          const replacement = options.preprocess(description);
-          if (typeof replacement !== 'string') {
-            // Also contain an accidentally asynchronous JavaScript callback.
-            void Promise.resolve(replacement).catch(ignoreResult);
-            throw new Error('Invalid preprocessing result');
-          }
-          description = replacement;
-        } catch {
-          options.onPreprocessingFailure();
-        }
-      }
-      description = description.slice(0, 100);
+      description = preprocessDescription(description, this.options).slice(0, 100);
       const key = JSON.stringify([kind, description, stack]);
-      if (reported.has(key) || reported.size >= 10) return false;
-      reported.add(key);
-      return await options.send('exception', {
+      if (!this.reserveReport(key)) return false;
+      return await this.options.send('exception', {
         description,
         ...(stack ? { stack } : {}),
         error_kind: kind,
@@ -90,18 +85,44 @@ export function createExceptionReporter(options: ReporterOptions) {
   }
 
   /**
+   * Reserves a unique exception within the client's lifetime report limit.
+   */
+  private reserveReport(key: string) {
+    if (this.reported.has(key) || this.reported.size >= 10) return false;
+    this.reported.add(key);
+    return true;
+  }
+
+  /**
    * Reports uncaught errors without intercepting normal browser error handling.
    */
-  function onError(event: ErrorEvent) {
+  private onError = (event: ErrorEvent) => {
     if (event.error == null && !event.message) return;
-    void report('uncaught_error', event.error ?? event.message);
-  }
+    void this.report('uncaught_error', event.error ?? event.message);
+  };
 
   /**
    * Reports unhandled rejections without marking them as handled in the browser.
    */
-  function onRejection(event: PromiseRejectionEvent) {
-    void report('unhandled_rejection', event.reason);
+  private onRejection = (event: PromiseRejectionEvent) => {
+    void this.report('unhandled_rejection', event.reason);
+  };
+}
+
+/**
+ * Applies optional message preprocessing while preserving the original on failure.
+ */
+function preprocessDescription(description: string, options: ReporterOptions) {
+  if (!options.preprocess) return description;
+  try {
+    const replacement = options.preprocess(description);
+    if (typeof replacement === 'string') return replacement;
+    // Also contain an accidentally asynchronous JavaScript callback.
+    void Promise.resolve(replacement).catch(ignoreResult);
+    throw new Error('Invalid preprocessing result');
+  } catch {
+    options.onPreprocessingFailure();
+    return description;
   }
 }
 
@@ -110,13 +131,21 @@ export function createExceptionReporter(options: ReporterOptions) {
  */
 function getStack(reason: unknown, description: string) {
   try {
-    if (!(reason instanceof Error) || typeof reason.stack !== 'string') return;
-    const lines = reason.stack.split('\n');
-    if (lines[0] === description) lines.shift();
-    return lines.join('\n').slice(0, 100) || undefined;
+    const stack = reason instanceof Error ? reason.stack : undefined;
+    if (typeof stack !== 'string') return;
+    return normalizeStack(stack, description);
   } catch {
     return undefined;
   }
+}
+
+/**
+ * Removes the description header and limits stack frames to the event budget.
+ */
+function normalizeStack(stack: string, description: string) {
+  const lines = stack.split('\n');
+  if (lines[0] === description) lines.shift();
+  return lines.join('\n').slice(0, 100) || undefined;
 }
 
 /**
@@ -128,11 +157,18 @@ function getDescription(reason: unknown) {
     if (typeof reason === 'string') return reason;
     return JSON.stringify(reason) ?? String(reason);
   } catch {
-    try {
-      return String(reason);
-    } catch {
-      return 'Unknown error';
-    }
+    return stringifyReason(reason);
+  }
+}
+
+/**
+ * Falls back to a safe description when JSON conversion fails.
+ */
+function stringifyReason(reason: unknown) {
+  try {
+    return String(reason);
+  } catch {
+    return 'Unknown error';
   }
 }
 

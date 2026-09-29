@@ -3,6 +3,7 @@
  */
 import js from '@eslint/js';
 import { defineConfig, includeIgnoreFile } from 'eslint/config';
+import visualComplexity from 'eslint-plugin-visual-complexity';
 import globals from 'globals';
 import { fileURLToPath } from 'node:url';
 import tseslint from 'typescript-eslint';
@@ -18,6 +19,20 @@ export default defineConfig(
   {
     files: ['**/*.{js,mjs,ts}'],
     extends: [js.configs.recommended],
+    plugins: {
+      visual: visualComplexity,
+    },
+    rules: {
+      complexity: 0,
+      'visual/complexity': ['error', { max: 5 }],
+      'max-depth': ['error', { max: 2 }],
+      'max-nested-callbacks': ['error', { max: 2 }],
+      'max-params': ['error', { max: 3 }],
+      'max-statements': ['error', { max: 12 }, { ignoreTopLevelFunctions: false }],
+      'max-lines-per-function': ['error', { max: 30, skipBlankLines: true, skipComments: true }],
+      'max-len': ['error', { code: 120, ignoreUrls: true }],
+      'max-lines': ['error', { max: 200, skipComments: true, skipBlankLines: true }],
+    },
   },
   {
     files: ['**/*.ts'],

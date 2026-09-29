@@ -53,59 +53,87 @@ export function createDeferred<T>() {
  * Creates one stateful storage area with controllable operation outcomes.
  */
 function createStorageArea(initialValues: StorageValues = {}) {
-  const values = structuredClone(initialValues);
-  const getResults: Array<Promise<StorageValues> | StorageValues> = [];
-  const removeResults: Array<Promise<void>> = [];
-  const setResults: Array<Promise<void>> = [];
-  const listeners = new Set<StorageChangeListener>();
+  return new StorageArea(initialValues);
+}
 
-  const get = vi.fn(async (key: string) => {
-    if (getResults.length > 0) return structuredClone(await getResults.shift()!);
-    return key in values ? { [key]: structuredClone(values[key]) } : {};
+/**
+ * Models one native storage area with queued outcomes and change listeners.
+ */
+class StorageArea {
+  readonly values: StorageValues;
+  private getResults: Array<Promise<StorageValues> | StorageValues> = [];
+  private removeResults: Array<Promise<void>> = [];
+  private setResults: Array<Promise<void>> = [];
+  private listeners = new Set<StorageChangeListener>();
+
+  constructor(initialValues: StorageValues) {
+    this.values = structuredClone(initialValues);
+  }
+
+  /**
+   * Reads stored values or the next controlled result.
+   */
+  get = vi.fn(async (key: string) => {
+    if (this.getResults.length > 0) return structuredClone(await this.getResults.shift()!);
+    return key in this.values ? { [key]: structuredClone(this.values[key]) } : {};
   });
 
-  const set = vi.fn(async (items: StorageValues) => {
-    if (setResults.length > 0) await setResults.shift();
-
+  /**
+   * Stores values and delivers their native change events.
+   */
+  set = vi.fn(async (items: StorageValues) => {
+    if (this.setResults.length > 0) await this.setResults.shift();
     const changes: Record<string, chrome.storage.StorageChange> = {};
     for (const [key, value] of Object.entries(items)) {
-      changes[key] = createStorageChange(values, key, value);
-      values[key] = structuredClone(value);
+      changes[key] = createStorageChange(this.values, key, value);
+      this.values[key] = structuredClone(value);
     }
-    emitChanges(listeners, changes);
+    emitChanges(this.listeners, changes);
   });
 
-  const remove = vi.fn(async (key: string) => {
-    if (removeResults.length > 0) await removeResults.shift();
-    if (!(key in values)) return;
-
-    const changes = { [key]: { oldValue: structuredClone(values[key]) } };
-    delete values[key];
-    emitChanges(listeners, changes);
+  /**
+   * Removes a stored value and delivers its native change event.
+   */
+  remove = vi.fn(async (key: string) => {
+    if (this.removeResults.length > 0) await this.removeResults.shift();
+    if (!(key in this.values)) return;
+    const changes = { [key]: { oldValue: structuredClone(this.values[key]) } };
+    delete this.values[key];
+    emitChanges(this.listeners, changes);
   });
 
-  return {
-    emitChange(changes: Record<string, chrome.storage.StorageChange>) {
-      applyChanges(values, changes);
-      emitChanges(listeners, changes);
-    },
-    get,
-    queueGet(result: Promise<StorageValues> | StorageValues) {
-      getResults.push(result);
-    },
-    queueRemove(result: Promise<void>) {
-      removeResults.push(result);
-    },
-    queueSet(result: Promise<void>) {
-      setResults.push(result);
-    },
-    remove,
-    set,
-    values,
-    onChanged: {
-      addListener: vi.fn((listener: StorageChangeListener) => listeners.add(listener)),
-      removeListener: vi.fn((listener: StorageChangeListener) => listeners.delete(listener)),
-    },
+  /**
+   * Applies an external update and notifies registered listeners.
+   */
+  emitChange(changes: Record<string, chrome.storage.StorageChange>) {
+    applyChanges(this.values, changes);
+    emitChanges(this.listeners, changes);
+  }
+
+  /**
+   * Controls the next storage read.
+   */
+  queueGet(result: Promise<StorageValues> | StorageValues) {
+    this.getResults.push(result);
+  }
+
+  /**
+   * Controls the next storage removal.
+   */
+  queueRemove(result: Promise<void>) {
+    this.removeResults.push(result);
+  }
+
+  /**
+   * Controls the next storage write.
+   */
+  queueSet(result: Promise<void>) {
+    this.setResults.push(result);
+  }
+
+  onChanged = {
+    addListener: vi.fn((listener: StorageChangeListener) => this.listeners.add(listener)),
+    removeListener: vi.fn((listener: StorageChangeListener) => this.listeners.delete(listener)),
   };
 }
 

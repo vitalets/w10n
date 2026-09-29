@@ -10,14 +10,19 @@ const registry = JSON.parse(await readFile(resolve(root, 'registry.json'), 'utf8
 const sourcePrefix = 'src/';
 
 for (const item of registry.items) {
-  for (const file of item.files) {
-    if (!file.path.startsWith(sourcePrefix)) {
-      throw new Error(`Unsupported registry source: ${file.path}`);
-    }
-    const destination = resolve(root, 'example/src/w10n', file.path.slice(sourcePrefix.length));
-    await mkdir(dirname(destination), { recursive: true });
-    await copyFile(resolve(root, file.path), destination);
-  }
+  for (const file of item.files) await copyRegistryFile(file);
 }
 
 console.log('Copied registry modules to example/src/w10n.');
+
+/**
+ * Copies one supported registry source to its consumer destination.
+ */
+async function copyRegistryFile(file) {
+  if (!file.path.startsWith(sourcePrefix)) {
+    throw new Error(`Unsupported registry source: ${file.path}`);
+  }
+  const destination = resolve(root, 'example/src/w10n', file.path.slice(sourcePrefix.length));
+  await mkdir(dirname(destination), { recursive: true });
+  await copyFile(resolve(root, file.path), destination);
+}
