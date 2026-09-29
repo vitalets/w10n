@@ -25,7 +25,6 @@ test('sends one typed event with extension context and user agent', async () => 
         name: 'changed',
         params: {
           value: true,
-          page: 'background',
           content_group: 'background',
           extension_version: '1.2.3',
           session_id: '1800000000000',
@@ -77,19 +76,36 @@ test.each(['/', '/options/index.html', '/options/index.html?tab=general#theme'])
     await analytics.sendException('example');
     for (const request of requests) {
       const params = JSON.parse(request.body).events[0].params;
-      expect(params.page).toBe(`chrome-extension://example${path}`);
-      expect(params.content_group).toBe(path);
+      expect(params.content_group).toBe(new URL(`chrome-extension://example${path}`).pathname);
     }
   },
 );
 
-test('truncates page and content group independently', async () => {
-  const path = '/' + 'a'.repeat(150);
+test('preserves the full page-view URL while grouping by pathname', async () => {
+  const url = 'chrome-extension://example/options/index.html?tab=general#theme';
+  vi.stubGlobal('document', {});
+  vi.stubGlobal('location', new URL(url));
+  const analytics = createGoogleAnalytics<{
+    name: 'page_view';
+    params: { page_location: string; page_title: string };
+  }>(config);
+  await analytics.sendEvent('page_view', {
+    page_location: url,
+    page_title: 'Options',
+  });
+  expect(payload()).toMatchObject({
+    page_location: url,
+    page_title: 'Options',
+    content_group: '/options/index.html',
+  });
+});
+
+test('keeps the last 100 characters of the content group pathname', async () => {
+  const path = '/' + 'a'.repeat(150) + '/index.html';
   vi.stubGlobal('document', {});
   vi.stubGlobal('location', new URL(`chrome-extension://example${path}`));
   await client().sendEvent('opened');
-  expect(payload().page).toBe(`chrome-extension://example${path}`.slice(0, 100));
-  expect(payload().content_group).toBe(path.slice(0, 100));
+  expect(payload().content_group).toBe('a'.repeat(89) + '/index.html');
 });
 
 test('module metadata overrides caller values including disabled debug mode', async () => {
@@ -98,7 +114,6 @@ test('module metadata overrides caller values including disabled debug mode', as
     params: Record<string, string | number | boolean>;
   }>(config);
   await analytics.sendEvent('opened', {
-    page: 'other',
     content_group: 'other',
     session_id: 'other',
     extension_version: 'other',
@@ -106,7 +121,6 @@ test('module metadata overrides caller values including disabled debug mode', as
     debug_mode: true,
   });
   expect(payload()).toMatchObject({
-    page: 'background',
     content_group: 'background',
     extension_version: '1.2.3',
     engagement_time_msec: 100,

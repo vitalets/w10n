@@ -194,10 +194,7 @@ function getCollectionUrl(config: GoogleAnalyticsOptions) {
 function getMetadata() {
   const isBackground = typeof document === 'undefined';
   return {
-    page: isBackground ? 'background' : location.href.slice(0, 100),
-    content_group: isBackground
-      ? 'background'
-      : (location.pathname + location.search + location.hash).slice(0, 100),
+    content_group: isBackground ? 'background' : location.pathname.slice(-100),
     extension_version: chrome.runtime.getManifest().version,
   };
 }

@@ -153,20 +153,39 @@ failure generates its own `onError` notification.
 
 ## Automatic metadata
 
-| Parameter              | Background worker | Extension document                                   |
-| ---------------------- | ----------------- | ---------------------------------------------------- |
-| `page`                 | `background`      | `location.href`, truncated to 100 characters         |
-| `content_group`        | `background`      | Path + query + fragment, truncated to 100 characters |
-| `extension_version`    | Manifest version  | Manifest version                                     |
-| `session_id`           | Managed session   | Managed session                                      |
-| `engagement_time_msec` | `100`             | `100`                                                |
+| Parameter              | Background worker | Extension document                         |
+| ---------------------- | ----------------- | ------------------------------------------ |
+| `content_group`        | `background`      | Last 100 characters of `location.pathname` |
+| `extension_version`    | Manifest version  | Manifest version                           |
+| `session_id`           | Managed session   | Managed session                            |
+| `engagement_time_msec` | `100`             | `100`                                      |
 
-The document content group preserves the leading slash; for example,
-`/options/index.html?tab=general#theme`. Both URL fields include query strings and
-fragments, subject to independent truncation. Caller parameters cannot override
+The document content group excludes query strings and fragments; for example,
+`/options/index.html`. Pathnames longer than 100 characters are truncated from the
+start, keeping the end of the path. Caller parameters cannot override
 module-owned metadata, including `debug_mode`. The fixed engagement value is a
 minimal event value, not a measurement of time spent on a page. There are no
 automatic page views.
+
+For explicit page views, include a `page_view` event in the application's event
+union and send the full URL as `page_location`:
+
+```ts
+type PageViewEvent = {
+  name: 'page_view';
+  params: { page_location: string; page_title: string };
+};
+
+// With PageViewEvent included in the analytics client's event union:
+await analytics.sendEvent('page_view', {
+  page_location: location.href,
+  page_title: document.title,
+});
+```
+
+`page_location` is supplied by the application, not added automatically. It keeps
+the full URL, including the protocol, query string, and fragment, while
+`content_group` identifies only the pathname.
 
 ## Sessions and delivery
 
