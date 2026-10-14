@@ -1,9 +1,9 @@
 /**
- * Creates an action-scoped Debug submenu and dispatches its commands using generated IDs.
+ * Creates an action-scoped DEBUG submenu and dispatches its commands using generated IDs.
  */
 
 /**
- * A labeled development action invoked from the Debug submenu.
+ * A labeled development action invoked from the DEBUG submenu.
  */
 export type DebugCommand = {
   title: string;
@@ -16,7 +16,7 @@ export type DebugCommand = {
 const MENU_ID = 'w10n-debug';
 
 /**
- * Registers command handling synchronously and replaces the Debug submenu.
+ * Registers command handling synchronously and replaces the DEBUG submenu.
  * Call once during service-worker initialization, gated by the consumer's development mode.
  */
 export async function createDebugContextMenu(commands: readonly DebugCommand[]) {
@@ -38,7 +38,7 @@ export async function createDebugContextMenu(commands: readonly DebugCommand[]) 
     // Removing the parent also removes stale commands from a previous worker.
     await chrome.contextMenus.remove(MENU_ID).catch(() => {});
     if (!items.length) return;
-    await createItem({ id: MENU_ID, title: 'Debug', contexts: ['action'] });
+    await createItem({ id: MENU_ID, title: 'DEBUG', contexts: ['action'] });
     for (const { id, title } of items) {
       await createItem({ id, title, parentId: MENU_ID, contexts: ['action'] });
     }

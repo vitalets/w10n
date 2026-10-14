@@ -1,5 +1,5 @@
 /**
- * Verifies Debug submenu registration, command dispatch, and startup failures.
+ * Verifies DEBUG submenu registration, command dispatch, and startup failures.
  */
 import { afterEach, expect, test, vi } from 'vitest';
 import { createDebugContextMenu } from '../index';
@@ -11,7 +11,7 @@ test('creates action commands with generated identifiers', async () => {
   await createDebugContextMenu([{ title: 'First', run: () => {} }]);
   expect([...menus.items.values()]).toEqual([
     { id: 'other', title: 'Other' },
-    { id: 'w10n-debug', title: 'Debug', contexts: ['action'] },
+    { id: 'w10n-debug', title: 'DEBUG', contexts: ['action'] },
     {
       id: 'w10n-debug-0',
       title: 'First',
@@ -52,7 +52,7 @@ test('replaces stale commands after a worker restart', async () => {
   await createDebugContextMenu([{ title: 'Updated', run: () => {} }]);
   expect([...menus.items.values()].map(({ title }) => title)).toEqual([
     'Other',
-    'Debug',
+    'DEBUG',
     'Updated',
   ]);
 });

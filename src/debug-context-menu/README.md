@@ -1,10 +1,10 @@
 # Debug Context Menu
 
-Development commands in the extension toolbar action's Debug submenu.
+Development commands in the extension toolbar action's DEBUG submenu.
 
 ## Key behavior
 
-- Turns an array of labeled commands into a Debug submenu with automatic click handling.
+- Turns an array of labeled commands into a DEBUG submenu with automatic click handling.
 
 ## Installation
 
