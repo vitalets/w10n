@@ -14,6 +14,7 @@ modified, and maintained locally, including by AI agents.
 - [Errors](src/errors/README.md)
 - [Google Analytics](src/google-analytics/README.md)
 - [Context Menu](src/context-menu/README.md)
+- [Debug Context Menu](src/debug-context-menu/README.md)
 
 ## Example extension
 

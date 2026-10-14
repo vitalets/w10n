@@ -82,6 +82,19 @@
           "target": "~/src/w10n/google-analytics/transport.ts"
         }
       ]
+    },
+    {
+      "name": "debug-context-menu",
+      "type": "registry:item",
+      "title": "Debug Context Menu",
+      "description": "Action-scoped debug commands with generated identifiers and automatic click handling.",
+      "files": [
+        {
+          "path": "src/debug-context-menu/index.ts",
+          "type": "registry:file",
+          "target": "~/src/w10n/debug-context-menu/index.ts"
+        }
+      ]
     }
   ]
 }
