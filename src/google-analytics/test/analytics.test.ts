@@ -12,10 +12,12 @@ import {
   fetchMock,
   getStorage,
   setStorage,
+  stubTimeZone,
   type Events,
 } from './helpers';
 
 test('sends one typed event with extension context and user agent', async () => {
+  stubTimeZone('Europe/Madrid');
   expect(await client().sendEvent('changed', { value: true, omitted: undefined })).toBe(true);
   expect(JSON.parse(requests[0].body)).toEqual({
     client_id: '123.456',
@@ -27,6 +29,7 @@ test('sends one typed event with extension context and user agent', async () => 
           value: true,
           content_group: 'background',
           extension_version: '1.2.3',
+          time_zone: 'Europe/Madrid',
           session_id: '1800000000000',
           engagement_time_msec: 100,
         },
@@ -43,6 +46,28 @@ test('uses a simple CORS request without requiring host permission', async () =>
   expect(request.method).toBe('POST');
   expect(request.mode).toBe('cors');
   expect([...request.headers]).toEqual([['content-type', 'text/plain;charset=UTF-8']]);
+});
+
+test('includes time zone in document exceptions', async () => {
+  stubTimeZone('Europe/Madrid');
+  vi.stubGlobal('document', {});
+  vi.stubGlobal('location', new URL('chrome-extension://example/options/index.html'));
+  await client().sendException('example');
+  expect(payload().time_zone).toBe('Europe/Madrid');
+});
+
+test('sends unknown time zone when detection returns an empty value', async () => {
+  stubTimeZone('');
+  expect(await client().sendEvent('opened')).toBe(true);
+  expect(payload().time_zone).toBe('unknown');
+  expect(failures).toEqual([]);
+});
+
+test('sends unknown time zone when detection throws', async () => {
+  stubTimeZone(new Error('Unavailable'));
+  expect(await client().sendEvent('opened')).toBe(true);
+  expect(payload().time_zone).toBe('unknown');
+  expect(failures).toEqual([]);
 });
 
 test.each(['measurementId', 'apiSecret', 'clientId'] as const)(
@@ -109,6 +134,7 @@ test('keeps the last 100 characters of the content group pathname', async () => 
 });
 
 test('module metadata overrides caller values including disabled debug mode', async () => {
+  stubTimeZone('Europe/Madrid');
   const analytics = createGoogleAnalytics<{
     name: 'opened';
     params: Record<string, string | number | boolean>;
@@ -117,12 +143,14 @@ test('module metadata overrides caller values including disabled debug mode', as
     content_group: 'other',
     session_id: 'other',
     extension_version: 'other',
+    time_zone: 'other',
     engagement_time_msec: 50,
     debug_mode: true,
   });
   expect(payload()).toMatchObject({
     content_group: 'background',
     extension_version: '1.2.3',
+    time_zone: 'Europe/Madrid',
     engagement_time_msec: 100,
   });
   expect(payload().session_id).not.toBe('other');

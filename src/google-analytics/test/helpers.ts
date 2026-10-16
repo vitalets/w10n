@@ -68,6 +68,18 @@ export function emit(type: string, values: Record<string, unknown>) {
 }
 
 /**
+ * Stubs runtime time zone detection with an explicit value or error.
+ */
+export function stubTimeZone(timeZone: string | Error) {
+  vi.stubGlobal('Intl', {
+    DateTimeFormat: () => {
+      if (timeZone instanceof Error) throw timeZone;
+      return { resolvedOptions: () => ({ timeZone }) };
+    },
+  });
+}
+
+/**
  * Installs browser globals backed by the current test state.
  */
 function installBrowser() {

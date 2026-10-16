@@ -196,7 +196,19 @@ function getMetadata() {
   return {
     content_group: isBackground ? 'background' : location.pathname.slice(-100),
     extension_version: chrome.runtime.getManifest().version,
+    time_zone: getTimeZone(),
   };
+}
+
+/**
+ * Reads the runtime's IANA time zone with a fallback when unavailable.
+ */
+function getTimeZone() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'unknown';
+  } catch {
+    return 'unknown';
+  }
 }
 
 /**

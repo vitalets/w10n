@@ -157,8 +157,14 @@ failure generates its own `onError` notification.
 | ---------------------- | ----------------- | ------------------------------------------ |
 | `content_group`        | `background`      | Last 100 characters of `location.pathname` |
 | `extension_version`    | Manifest version  | Manifest version                           |
+| `time_zone`            | Runtime time zone | Runtime time zone                          |
 | `session_id`           | Managed session   | Managed session                            |
 | `engagement_time_msec` | `100`             | `100`                                      |
+
+`time_zone` contains the runtime's IANA time zone (for example, `Europe/Madrid`)
+for events and exceptions. It is read once per logical send; retries reuse that
+value. If detection returns an empty value or throws, it is `'unknown'` and
+delivery continues normally.
 
 The document content group excludes query strings and fragments; for example,
 `/options/index.html`. Pathnames longer than 100 characters are truncated from the
