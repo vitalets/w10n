@@ -22,6 +22,7 @@ These scope boundaries apply to all rules below.
 
 ## Commenting
 
+- When suppressing ESLint for a single line, use the `// eslint-disable-next-line ...` form, not `// eslint-disable-line ...`.
 - Use multi-line block-form JSDoc for file-level and declaration documentation,
   including existing comments on functions, methods, and constants. Reformat or
   rewrite these comments as needed, preserving their meaning and useful details.
@@ -49,10 +50,11 @@ These scope boundaries apply to all rules below.
 - **Shallow nesting:** Prefer guard clauses and early returns. Extract meaningful operations when nested blocks obscure the main flow.
 - **Readable callbacks:** Avoid deeply nested callbacks. Use named helpers or `async`/`await` where appropriate without changing execution behavior.
 - **Small parameter lists:** Keep inputs easy to understand at call sites. Group related inputs into a named object when that clarifies their meaning.
-- **Focused functions:** Keep functions, methods, and callbacks concise and centered on a clear responsibility. Extract coherent steps when the main operation becomes difficult to follow.
+- **Focused functions:** Keep functions, methods, and callbacks concise and centered on a clear responsibility.
+- **Separate orchestration from implementation:** Functions and methods that coordinate a workflow should read as a sequence of meaningful steps. Extract the implementation details of those steps into named helpers, even when short or used only once. Keep straightforward assignments and control flow inline. Apply this when writing new code as well as refactoring.
 - **Readable lines:** Break long expressions at natural boundaries. Keep URLs intact and preserve existing body comments according to the commenting rules.
 - **Focused files:** Keep each module centered on a cohesive purpose. Separate distinct responsibilities when a file becomes difficult to navigate.
-- **Meaningful refactoring:** Preserve useful comments and whitespace. Avoid compressing code or introducing trivial helpers solely to make functions or files shorter.
+- **Meaningful refactoring:** Preserve useful comments and whitespace. Avoid compressing code solely to make functions or files shorter. Extract helpers to communicate intent and keep a consistent level of abstraction, not merely to shorten code. Avoid helpers whose names add no meaning beyond the expressions they wrap.
 
 ## Example
 

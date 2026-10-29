@@ -95,6 +95,19 @@
           "target": "~/src/w10n/debug-context-menu/index.ts"
         }
       ]
+    },
+    {
+      "name": "migration",
+      "type": "registry:item",
+      "title": "Migration",
+      "description": "Sequential extension upgrade migrations ordered by target release.",
+      "files": [
+        {
+          "path": "src/migration/index.ts",
+          "type": "registry:file",
+          "target": "~/src/w10n/migration/index.ts"
+        }
+      ]
     }
   ]
 }

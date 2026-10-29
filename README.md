@@ -15,6 +15,7 @@ modified, and maintained locally, including by AI agents.
 - [Google Analytics](src/google-analytics/README.md)
 - [Context Menu](src/context-menu/README.md)
 - [Debug Context Menu](src/debug-context-menu/README.md)
+- [Migration](src/migration/README.md)
 
 ## Example extension
 

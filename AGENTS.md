@@ -103,6 +103,8 @@ is currently no build step.
 - Name test-harness results after the observable outcome they contain.
 - Add coverage to an existing behavior-oriented test file when it fits; create
   another file only for a distinct concern.
+- When creating or editing test files, follow
+  `.agents/rules/good-tests.md`.
 
 ## Adding a module
 
@@ -111,3 +113,7 @@ is currently no build step.
 3. Add an item to `registry.json` and enumerate every distributable file.
 4. Document installation and usage in `README.md`.
 5. Run `npm test` and `npm run tsc`.
+
+## Source file structure
+
+When creating or editing TypeScript files, follow `.agents/rules/ts-file-structure.md`.
