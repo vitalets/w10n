@@ -57,7 +57,7 @@ async function onContextMenuClicked(info: chrome.contextMenus.OnClickData) {
  * Runs applicable migrations when the extension is upgraded.
  */
 async function onInstalled(details: chrome.runtime.InstalledDetails) {
-  if (details.reason !== 'update' || details.previousVersion === undefined) return;
+  if (details.reason !== 'update') return;
   try {
     await migrate({
       previousVersion: details.previousVersion,

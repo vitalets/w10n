@@ -108,7 +108,8 @@ The background owns the installation listener and calls `migrate()` from
 `convert-string-to-array-of-strings.ts` migration targets release `0.0.2`. It converts a local-storage value such as
 `{ exampleStrings: 'foo' }` to `{ exampleStrings: ['foo'] }`. Missing values and
 existing arrays are left unchanged, making the migration safe to repeat. The
-sample key is independent of the options page and analytics.
+sample key is independent of the options page and analytics. This non-critical
+migration catches and logs its own errors, allowing later migrations to continue.
 
 To try the migration:
 

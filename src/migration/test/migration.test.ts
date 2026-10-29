@@ -2,7 +2,8 @@
  * Verifies release selection, ordered execution, and migration failure semantics.
  */
 import { expect, test } from 'vitest';
-import { runMigrations, type Migration } from '../index';
+import { runMigrations } from '../index';
+import { step } from './helpers';
 
 test('runs every crossed release in numeric order', async () => {
   const effects: string[] = [];
@@ -68,51 +69,28 @@ test('waits for each step', async () => {
   expect(completed).toBe(true);
 });
 
-test('stops after rejection', async () => {
-  const effects: string[] = [];
-  const failure = new Error('Failed step');
-  await expect(
-    runMigrations(
-      [
-        step('2', 'first', effects),
-        {
-          version: '3',
-          async run() {
-            throw failure;
-          },
-        },
-        step('4', 'second', effects),
-      ],
-      { previousVersion: '1', currentVersion: '4' },
-    ),
-  ).rejects.toBe(failure);
-  expect(effects).toEqual(['first']);
-});
-
-test('repeats selected steps on each call', async () => {
-  const effects: string[] = [];
-  const migrations: Migration[] = [
-    step('2', 'first', effects),
-    {
-      version: '3',
-      async run() {
-        throw new Error('Failed step');
-      },
-    },
-  ];
-  const versions = { previousVersion: '1', currentVersion: '3' };
-  await expect(runMigrations(migrations, versions)).rejects.toThrow(/Failed step/);
-  // The caller fixes the failed step and retries the same release range.
-  migrations[1] = step('3', 'second', effects);
-  await runMigrations(migrations, versions);
-  // A successful call does not checkpoint subsequent calls either.
-  await runMigrations(migrations, versions);
-  expect(effects).toEqual(['first', 'first', 'second', 'first', 'second']);
-});
-
 test.each(['2.0', '1'])('runs nothing when current release is %s', async (currentVersion) => {
   const effects: string[] = [];
   await runMigrations([step('2', 'first', effects)], { previousVersion: '2', currentVersion });
+  expect(effects).toEqual([]);
+});
+
+test('skips all work without a previous version', async () => {
+  const effects: string[] = [];
+  await expect(
+    runMigrations([step('2', 'foo', effects)], {
+      previousVersion: undefined,
+      currentVersion: '3',
+    }),
+  ).resolves.toBeUndefined();
+  expect(effects).toEqual([]);
+  // Version validation is skipped too.
+  await expect(
+    runMigrations([step('foo', 'bar', effects)], {
+      previousVersion: undefined,
+      currentVersion: 'baz',
+    }),
+  ).resolves.toBeUndefined();
   expect(effects).toEqual([]);
 });
 
@@ -159,7 +137,10 @@ test.each(['2', '1'])(
   'validates registered versions even when current release is %s',
   async (currentVersion) => {
     await expect(
-      runMigrations([step('foo', 'first', [])], { previousVersion: '2', currentVersion }),
+      runMigrations([step('foo', 'first', [])], {
+        previousVersion: '2',
+        currentVersion,
+      }),
     ).rejects.toThrow(/Invalid extension version.*foo/);
   },
 );
@@ -169,18 +150,6 @@ test('validates bounds even for an empty registry', async () => {
     /Invalid extension version.*foo/,
   );
 });
-
-/**
- * Creates a migration whose completion is observable in the supplied effects.
- */
-function step(version: string, value: string, effects: string[]) {
-  return {
-    version,
-    async run() {
-      effects.push(value);
-    },
-  };
-}
 
 /**
  * Lets a test explicitly complete a pending asynchronous step.

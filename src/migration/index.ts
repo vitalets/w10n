@@ -8,24 +8,29 @@ export type Migration = {
 };
 
 export type MigrationVersions = {
-  previousVersion: string;
+  previousVersion: string | undefined;
   currentVersion: string;
 };
 
 /**
- * Validates release versions and awaits each applicable upgrade step in order.
+ * Skips missing previous versions; otherwise validates and runs applicable upgrade steps.
  */
 export async function runMigrations(migrations: readonly Migration[], versions: MigrationVersions) {
-  const selected = selectMigrations(migrations, versions);
+  if (versions.previousVersion === undefined) return;
+  const selected = selectMigrations(migrations, versions.previousVersion, versions.currentVersion);
   for (const migration of selected) await migration.run();
 }
 
 /**
  * Validates every target and selects crossed releases in ascending order.
  */
-function selectMigrations(migrations: readonly Migration[], versions: MigrationVersions) {
-  const previous = parseVersion(versions.previousVersion);
-  const current = parseVersion(versions.currentVersion);
+function selectMigrations(
+  migrations: readonly Migration[],
+  previousVersion: string,
+  currentVersion: string,
+) {
+  const previous = parseVersion(previousVersion);
+  const current = parseVersion(currentVersion);
   const targets = migrations.map((migration) => ({
     migration,
     version: parseVersion(migration.version),

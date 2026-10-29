@@ -1,5 +1,5 @@
 /**
- * Converts the example's legacy string value into an array of strings on upgrade.
+ * Demonstrates a non-critical string-to-array upgrade with consumer-owned error handling.
  */
 import type { Migration } from '../w10n/migration';
 
@@ -9,11 +9,15 @@ import type { Migration } from '../w10n/migration';
 export const migration: Migration = {
   version: '0.0.2',
   /**
-   * Wraps a stored string in an array while preserving other existing values.
+   * Converts a stored string and reports failures without blocking later migrations.
    */
   async run() {
-    const { exampleStrings } = await chrome.storage.local.get('exampleStrings');
-    if (typeof exampleStrings !== 'string') return;
-    await chrome.storage.local.set({ exampleStrings: [exampleStrings] });
+    try {
+      const { exampleStrings } = await chrome.storage.local.get('exampleStrings');
+      if (typeof exampleStrings !== 'string') return;
+      await chrome.storage.local.set({ exampleStrings: [exampleStrings] });
+    } catch (error) {
+      console.error('Non-critical string-to-array migration failed', error);
+    }
   },
 };
