@@ -63,6 +63,13 @@ The script reads `registry.json` and copies its listed files from `src/` into
 To refresh the copies and build together, run `npm run build:example` from the
 repository root after installing the example's dependencies.
 
+## Background structure
+
+`src/background/index.ts` is the service-worker entry point. It loads
+`context-menu.ts` for the options command and `install.ts` for upgrade handling.
+`analytics.ts` initializes optional analytics shared with the context-menu handler.
+Upgrade steps live in `src/background/migrations/`.
+
 ## Modules in use
 
 | Module           | Example usage                                                                             |
@@ -103,8 +110,8 @@ the background worker remaining alive; there is no persistent event queue.
 
 ## Upgrade migrations
 
-The background owns the installation listener and calls `migrate()` from
-`migrations/index.ts` on upgrades. That entry point imports and runs the migrations. The
+The background installation handler in `src/background/install.ts` calls `migrate()`
+from `src/background/migrations/index.ts` on upgrades. That entry point imports and runs the migrations. The
 `convert-string-to-array-of-strings.ts` migration targets release `0.0.2`. It converts a local-storage value such as
 `{ exampleStrings: 'foo' }` to `{ exampleStrings: ['foo'] }`. Missing values and
 existing arrays are left unchanged, making the migration safe to repeat. The

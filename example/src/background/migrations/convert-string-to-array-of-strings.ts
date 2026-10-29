@@ -1,7 +1,7 @@
 /**
  * Demonstrates a non-critical string-to-array upgrade with consumer-owned error handling.
  */
-import type { Migration } from '../w10n/migration';
+import type { Migration } from '../../w10n/migration';
 
 /**
  * Upgrades the exampleStrings storage value for release 0.0.2.

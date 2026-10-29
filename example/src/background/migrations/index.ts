@@ -1,7 +1,7 @@
 /**
  * Collects the example's migrations and runs steps for the supplied upgrade range.
  */
-import { runMigrations, type MigrationVersions } from '../w10n/migration';
+import { runMigrations, type MigrationVersions } from '../../w10n/migration';
 import { migration as convertStringToArrayOfStrings } from './convert-string-to-array-of-strings';
 
 /**

@@ -9,7 +9,7 @@ export default defineManifest({
   version: '0.0.1',
   minimum_chrome_version: '123',
   permissions: ['storage', 'contextMenus'],
-  background: { service_worker: 'src/background.ts', type: 'module' },
+  background: { service_worker: 'src/background/index.ts', type: 'module' },
   action: { default_popup: 'src/popup/index.html' },
   options_page: 'src/options/index.html',
 });
