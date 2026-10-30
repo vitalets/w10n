@@ -16,6 +16,7 @@ modified, and maintained locally, including by AI agents.
 - [Context Menu](src/context-menu/README.md)
 - [Debug Context Menu](src/debug-context-menu/README.md)
 - [Migration](src/migration/README.md)
+- [Alarms](src/alarms/README.md)
 
 ## Example extension
 

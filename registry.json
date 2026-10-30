@@ -4,6 +4,19 @@
   "homepage": "https://github.com/vitalets/w10n",
   "items": [
     {
+      "name": "alarms",
+      "type": "registry:item",
+      "title": "Alarms",
+      "description": "Named WebExtension alarm registration that preserves existing schedules.",
+      "files": [
+        {
+          "path": "src/alarms/index.ts",
+          "type": "registry:file",
+          "target": "~/src/w10n/alarms/index.ts"
+        }
+      ]
+    },
+    {
       "name": "storage",
       "type": "registry:item",
       "title": "Storage",
