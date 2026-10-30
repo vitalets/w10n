@@ -1,24 +1,16 @@
 # Debug Context Menu
 
-Development commands in the extension toolbar action's DEBUG submenu.
-
-## Key behavior
-
-- Turns an array of labeled commands into a DEBUG submenu with automatic click handling.
-
-## Installation
-
-```sh
-npx shadcn@latest add vitalets/w10n/debug-context-menu
-```
+Turn labeled development commands into a DEBUG submenu in the extension toolbar
+action, with automatic click handling.
 
 ## Usage
 
 ```ts
 import { createDebugContextMenu } from './w10n/debug-context-menu';
 
-async function initDebugMenu() {
-  if (import.meta.env.MODE !== 'development') return;
+// ...
+
+if (import.meta.env.MODE === 'development') {
   await createDebugContextMenu([
     {
       title: 'Show Welcome',
@@ -28,15 +20,28 @@ async function initDebugMenu() {
     },
   ]);
 }
-
-void initDebugMenu();
 ```
 
 Each command has a `title` and a `run` callback. Callbacks may be synchronous or
 asynchronous and may return any value. Use an arrow callback when calling an
 object's method to preserve its receiver.
 
-## Requirements
+## Installation
+
+```sh
+npx shadcn@latest add vitalets/w10n/debug-context-menu
+```
+
+## Updating
+
+Give your coding agent this instruction:
+
+```text
+Update local w10n debug-context-menu module from https://github.com/vitalets/w10n/tree/main/src/debug-context-menu,
+preserving local customizations. Ask when unsure.
+```
+
+## Permissions
 
 Declare the `contextMenus` permission and use a Manifest V3 service worker.
 The Promise form of `chrome.contextMenus.remove()` requires Chrome 123 or newer.

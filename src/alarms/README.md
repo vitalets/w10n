@@ -35,6 +35,15 @@ Existing alarms keep their schedule and parameters.
 npx shadcn@latest add vitalets/w10n/alarms
 ```
 
+## Updating
+
+Give your coding agent this instruction:
+
+```text
+Update local w10n alarms module from https://github.com/vitalets/w10n/tree/main/src/alarms,
+preserving local customizations. Ask when unsure.
+```
+
 ## Permissions
 
 Declare the `alarms` permission in the extension manifest:

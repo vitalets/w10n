@@ -1,35 +1,12 @@
 # Storage
 
-A key-bound WebExtension storage interface with serialized read-transform-write
-operations.
-
-## Key behavior
-
-- Per-instance FIFO queue for `get()`, `set()`, and `remove()`.
-- Structured-cloned defaults.
-- An `undefined` updater result is a no-op; `remove()` deletes explicitly.
-- `local`, `session`, and `sync` namespaces.
-- Native-like change subscriptions.
-- Errors do not poison later queued operations.
-- Collection guidance for array storage.
-
-## Installation
-
-```sh
-npx shadcn@latest add vitalets/w10n/storage
-```
-
-Add the `storage` permission to the extension manifest:
-
-```json
-{
-  "permissions": ["storage"]
-}
-```
+Read and update WebExtension storage items with defaults and change subscriptions.
+Updates through a shared item instance run in order to prevent lost changes.
 
 ## Usage
 
-Create and export one shared item instance per key in each extension context:
+Use `storage.local`, `storage.session`, or `storage.sync`. Create and export one
+shared item instance per key in each extension context:
 
 ```ts
 import { storage } from './w10n/storage';
@@ -96,6 +73,31 @@ read-modify-write operations performed through the shared item instance:
 
 ```ts
 const groups = new storage.local.Item<Group[]>('groups', []);
+```
+
+## Installation
+
+```sh
+npx shadcn@latest add vitalets/w10n/storage
+```
+
+## Updating
+
+Give your coding agent this instruction:
+
+```text
+Update local w10n storage module from https://github.com/vitalets/w10n/tree/main/src/storage,
+preserving local customizations. Ask when unsure.
+```
+
+## Permissions
+
+Add the `storage` permission to the extension manifest:
+
+```json
+{
+  "permissions": ["storage"]
+}
 ```
 
 ## Concurrency boundary

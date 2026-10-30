@@ -1,28 +1,7 @@
 # Migration
 
-Sequential extension upgrade migrations ordered by target release, skipping calls without a previous version.
-
-## Install
-
-```sh
-npx shadcn@latest add vitalets/w10n/migration
-```
-
-## Key behavior
-
-Runs applicable upgrade steps in release order, including releases skipped during an upgrade.
-
-## API
-
-- `Migration`: an object with `version: string` and `run: () => Promise<void>` fields.
-- `MigrationVersions`: `{ previousVersion: string | undefined; currentVersion: string }`.
-- `runMigrations(migrations: readonly Migration[], versions: MigrationVersions)`:
-  resolves with no value after all selected steps finish, or rejects on invalid
-  versions or a failed step.
-
-The target version is the release introducing the migration. Selection uses
-`previousVersion < migration.version <= currentVersion`. For example, upgrading
-from 1.7 to 2.1 runs targets 2.0 and 2.1; upgrading from 2.0 to 2.1 runs only 2.1.
+Run extension upgrade steps in release order, including releases skipped during an
+upgrade. Calls without a previous version are skipped.
 
 ## Define a migration
 
@@ -79,8 +58,37 @@ already has an installation handler, call and await `migrate()` there before
 rebuilding dependent state. Use one lifecycle owner. Awaiting the runner in one
 handler does not block other listeners, extension contexts, or independent startup work.
 
+## Installation
+
+```sh
+npx shadcn@latest add vitalets/w10n/migration
+```
+
+## Updating
+
+Give your coding agent this instruction:
+
+```text
+Update local w10n migration module from https://github.com/vitalets/w10n/tree/main/src/migration,
+preserving local customizations. Ask when unsure.
+```
+
+## Permissions
+
 The module registers no listeners and reads no manifest or storage itself. It
-requires no storage permission; individual callbacks may require permissions.
+requires no extension permissions; individual callbacks may require permissions.
+
+## API
+
+- `Migration`: an object with `version: string` and `run: () => Promise<void>` fields.
+- `MigrationVersions`: `{ previousVersion: string | undefined; currentVersion: string }`.
+- `runMigrations(migrations: readonly Migration[], versions: MigrationVersions)`:
+  resolves with no value after all selected steps finish, or rejects on invalid
+  versions or a failed step.
+
+The target version is the release introducing the migration. Selection uses
+`previousVersion < migration.version <= currentVersion`. For example, upgrading
+from 1.7 to 2.1 runs targets 2.0 and 2.1; upgrading from 2.0 to 2.1 runs only 2.1.
 
 ## Version rules and ordering
 

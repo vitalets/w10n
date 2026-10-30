@@ -2,42 +2,6 @@
 
 Typed GA4 events and bounded exception reporting with configurable delivery retries.
 
-## Key behavior
-
-- Sends typed application events and normalized exceptions through one GA4 client.
-
-## Installation
-
-```sh
-npx shadcn@latest add vitalets/w10n/google-analytics
-```
-
-## Requirements
-
-Use in Manifest V3 background workers and extension-owned document pages. Content
-scripts and ordinary websites are outside scope. Each supported context creates
-its own client and sends directly. The module uses Promise-based `chrome` APIs
-and `chrome.storage.session`; test compatibility before targeting other browsers.
-
-Declare storage access in the extension manifest:
-
-```json
-{
-  "permissions": ["storage"]
-}
-```
-
-The GA4 endpoint allows CORS requests, so analytics does not require a host
-permission. Following [Chrome's GA4 example](https://developer.chrome.com/docs/extensions/how-to/integrate/google-analytics-4),
-the module sends a JSON string body without an explicit `application/json` header,
-avoiding a CORS preflight while retaining access to the HTTP response. If the
-extension sets `connect-src` or `default-src` in its content security policy, allow
-`https://www.google-analytics.com` there.
-
-Supply a GA4 measurement ID, Measurement Protocol API secret, and a stable client
-ID. The extension owns client-ID creation and persistence. Use a client ID accepted
-by [GA4 Measurement Protocol](https://developers.google.com/analytics/devguides/collection/protocol/ga4/reference?client_type=gtag).
-
 ## Typed events
 
 Define separate event types and combine them into an explicit union:
@@ -72,25 +36,6 @@ value, and parameter-count limits, including space for automatic metadata.
 `exception` is reserved: use `sendException` instead of `sendEvent`. The exported
 `ExceptionEvent` type describes exception fields before automatic metadata is
 appended; it cannot be included in the application event union.
-
-## Configuration
-
-| Option                       | Default                  | Purpose                                             |
-| ---------------------------- | ------------------------ | --------------------------------------------------- |
-| `measurementId`              | Required                 | GA4 stream identifier                               |
-| `apiSecret`                  | Required                 | Measurement Protocol credential                     |
-| `clientId`                   | Required                 | Extension-owned installation identity               |
-| `enabled`                    | `true`                   | Enables sending                                     |
-| `debug`                      | `false`                  | Adds `debug_mode` on the normal collection endpoint |
-| `retries`                    | `3`                      | Retries after the initial network attempt           |
-| `sessionStorageKey`          | `googleAnalyticsSession` | Shared session storage key                          |
-| `onError`                    | Optional                 | Receives sanitized failure details                  |
-| `preprocessExceptionMessage` | Optional                 | Transforms normalized exception descriptions        |
-
-Configuration is copied at creation and fixed for the client lifetime. Missing,
-non-string, or blank identifiers throw synchronously, including for disabled
-clients. `retries` must be a non-negative safe integer; invalid values also throw
-synchronously. Set `retries: 0` to disable retries. Disabled sends return false without storage or network operations.
 
 ## Exceptions
 
@@ -150,6 +95,68 @@ If preprocessing throws or returns a non-string, `onError` receives a
 `preprocessing` failure and reporting continues with the original normalized
 message. Normal truncation, deduplication, and caps apply. A subsequent sending
 failure generates its own `onError` notification.
+
+## Installation
+
+```sh
+npx shadcn@latest add vitalets/w10n/google-analytics
+```
+
+## Updating
+
+Give your coding agent this instruction:
+
+```text
+Update local w10n google-analytics module from https://github.com/vitalets/w10n/tree/main/src/google-analytics,
+preserving local customizations. Ask when unsure.
+```
+
+## Permissions
+
+Declare storage access in the extension manifest:
+
+```json
+{
+  "permissions": ["storage"]
+}
+```
+
+The GA4 endpoint allows CORS requests, so analytics does not require a host
+permission. Following [Chrome's GA4 example](https://developer.chrome.com/docs/extensions/how-to/integrate/google-analytics-4),
+the module sends a JSON string body without an explicit `application/json` header,
+avoiding a CORS preflight while retaining access to the HTTP response. If the
+extension sets `connect-src` or `default-src` in its content security policy, allow
+`https://www.google-analytics.com` there.
+
+## Requirements
+
+Use in Manifest V3 background workers and extension-owned document pages. Content
+scripts and ordinary websites are outside scope. Each supported context creates
+its own client and sends directly. The module uses Promise-based `chrome` APIs
+and `chrome.storage.session`; test compatibility before targeting other browsers.
+
+Supply a GA4 measurement ID, Measurement Protocol API secret, and a stable client
+ID. The extension owns client-ID creation and persistence. Use a client ID accepted
+by [GA4 Measurement Protocol](https://developers.google.com/analytics/devguides/collection/protocol/ga4/reference?client_type=gtag).
+
+## Configuration
+
+| Option                       | Default                  | Purpose                                             |
+| ---------------------------- | ------------------------ | --------------------------------------------------- |
+| `measurementId`              | Required                 | GA4 stream identifier                               |
+| `apiSecret`                  | Required                 | Measurement Protocol credential                     |
+| `clientId`                   | Required                 | Extension-owned installation identity               |
+| `enabled`                    | `true`                   | Enables sending                                     |
+| `debug`                      | `false`                  | Adds `debug_mode` on the normal collection endpoint |
+| `retries`                    | `3`                      | Retries after the initial network attempt           |
+| `sessionStorageKey`          | `googleAnalyticsSession` | Shared session storage key                          |
+| `onError`                    | Optional                 | Receives sanitized failure details                  |
+| `preprocessExceptionMessage` | Optional                 | Transforms normalized exception descriptions        |
+
+Configuration is copied at creation and fixed for the client lifetime. Missing,
+non-string, or blank identifiers throw synchronously, including for disabled
+clients. `retries` must be a non-negative safe integer; invalid values also throw
+synchronously. Set `retries: 0` to disable retries. Disabled sends return false without storage or network operations.
 
 ## Automatic metadata
 
