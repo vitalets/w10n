@@ -33,7 +33,7 @@
       "name": "logger",
       "type": "registry:item",
       "title": "Logger",
-      "description": "A console-compatible logger with automatic local-storage initialization and a build-time default.",
+      "description": "A console-compatible logger with always-on errors, automatic local-storage initialization, and a build-time default.",
       "files": [
         {
           "path": "src/logger/index.ts",

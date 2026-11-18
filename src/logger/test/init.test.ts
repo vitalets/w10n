@@ -15,6 +15,33 @@ test('logging is disabled by default', async () => {
   expect(app.stdout).toEqual([]);
 });
 
+test('errors print immediately before startup finishes', async () => {
+  const initialLoad = deferredLoad();
+  const app = await setupLogger({ initialLoad: initialLoad.promise });
+  const error = new Error('foo');
+
+  app.logger.error(error);
+
+  expect(app.stdout).toEqual([['error', error]]);
+  expect(app.stdout[0]![1]).toBe(error);
+  initialLoad.resolve({ loggingEnabled: true });
+  await app.storage.get.mock.results[0]!.value;
+  expect(app.stdout).toEqual([['error', error]]);
+});
+
+test('errors remain visible when logging is disabled', async () => {
+  const app = await setupLogger({ storage: { loggingEnabled: false } });
+  const error = new Error('foo');
+
+  app.logger.log('foo');
+  app.logger.info('bar');
+  app.logger.warn('baz');
+  app.logger.error(error);
+
+  expect(app.stdout).toEqual([['error', error]]);
+  expect(app.stdout[0]![1]).toBe(error);
+});
+
 test('LOGGING=1 enables logging automatically', async () => {
   const app = await setupLogger({ env: { LOGGING: '1' } });
 

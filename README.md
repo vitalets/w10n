@@ -10,7 +10,7 @@ modified, and maintained locally, including by AI agents.
 ## Modules
 
 - [Storage](src/storage/README.md)
-- [Logger](src/logger/README.md)
+- [Logger](src/logger/README.md) — always-on errors and configurable console logging.
 - [Errors](src/errors/README.md)
 - [Google Analytics](src/google-analytics/README.md)
 - [Context Menu](src/context-menu/README.md)

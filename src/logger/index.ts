@@ -1,5 +1,5 @@
 /**
- * Provides console-compatible logging that automatically loads its preference from extension storage.
+ * Always prints errors and loads the preference for other console logging from extension storage.
  */
 
 /**
@@ -23,7 +23,7 @@ let loggingEnabled: boolean | undefined;
 let stateRevision = 0;
 
 /**
- * Provides console-compatible methods governed by the logging preference.
+ * Provides console-compatible methods with always-on errors.
  */
 export const logger = {
   /**
@@ -42,7 +42,7 @@ export const logger = {
   warn: (...args: unknown[]) => write('warn', args),
 
   /**
-   * Writes an error message when logging is enabled.
+   * Writes an error immediately, regardless of the logging preference.
    */
   error: (...args: unknown[]) => write('error', args),
 };
@@ -92,10 +92,10 @@ function applyLoggingEnabled(enabled: boolean) {
 }
 
 /**
- * Sends a message when logging is enabled or buffers it until the initial preference is resolved.
+ * Prints errors immediately; gates other messages on the loaded logging preference.
  */
 function write(method: LogMethod, args: readonly unknown[]) {
-  if (loggingEnabled) {
+  if (method === 'error' || loggingEnabled) {
     globalThis.console[method](...args);
   } else if (loggingEnabled === undefined) {
     buffer.push([method, args]);

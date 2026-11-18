@@ -22,10 +22,11 @@ test('disables logging and saves the setting', async () => {
 
   const write = app.setLoggingEnabled(false);
   app.logger.log('foo');
+  app.logger.error('bar');
   await write;
 
   expect(app.storage.values).toEqual({ loggingEnabled: false });
-  expect(app.stdout).toEqual([]);
+  expect(app.stdout).toEqual([['error', 'bar']]);
 });
 
 test('a failed save keeps logging enabled', async () => {
